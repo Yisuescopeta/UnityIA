@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    { "$ref": "../common/mutation-command.schema.json" },
+    {
+      "properties": {
+        "command": { "const": "scene.object.reparent" },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target", "parent"],
+          "properties": {
+            "target": { "$ref": "../common/object-reference.schema.json" },
+            "parent": {
+              "oneOf": [
+                { "$ref": "../common/object-reference.schema.json" },
+                { "type": "null" }
+              ]
+            },
+            "worldPositionStays": { "type": "boolean", "default": true }
+          }
+        }
+      }
+    }
+  ]
+}
+

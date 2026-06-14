@@ -1,0 +1,18 @@
+{
+  "version": "0.1",
+  "allow": [
+    "scene.read",
+    "scene.modify",
+    "scene.save",
+    "asset.read"
+  ],
+  "paths": {
+    "read": [
+      "Assets/**"
+    ],
+    "write": [
+      "Assets/Scenes/**"
+    ]
+  }
+}
+

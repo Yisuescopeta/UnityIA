@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    { "$ref": "../common/mutation-command.schema.json" },
+    {
+      "properties": {
+        "command": { "const": "scene.object.set-transform" },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target"],
+          "properties": {
+            "target": { "$ref": "../common/object-reference.schema.json" },
+            "position": { "$ref": "../common/vector3.schema.json" },
+            "rotationEuler": { "$ref": "../common/vector3.schema.json" },
+            "scale": { "$ref": "../common/vector3.schema.json" }
+          },
+          "anyOf": [
+            { "required": ["position"] },
+            { "required": ["rotationEuler"] },
+            { "required": ["scale"] }
+          ]
+        }
+      }
+    }
+  ]
+}
+

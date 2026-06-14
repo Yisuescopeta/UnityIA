@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unityia.dev/schemas/common/mutation-command.schema.json",
+  "allOf": [
+    { "$ref": "command-base.schema.json" },
+    {
+      "required": ["preconditions"],
+      "properties": {
+        "preconditions": {
+          "type": "object",
+          "required": ["sessionId", "editorMode", "activeScenePath", "contextVersion"],
+          "properties": {
+            "sessionId": { "type": "string", "minLength": 1 },
+            "editorMode": { "const": "edit" },
+            "activeScenePath": { "type": "string", "minLength": 1 },
+            "contextVersion": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    }
+  ]
+}
+

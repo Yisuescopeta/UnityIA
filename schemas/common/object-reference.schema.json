@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unityia.dev/schemas/common/object-reference.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "globalObjectId": { "type": ["string", "null"] },
+    "hierarchyPath": { "type": ["string", "null"], "pattern": "^/" },
+    "scenePath": { "type": ["string", "null"] }
+  },
+  "anyOf": [
+    { "required": ["globalObjectId"] },
+    { "required": ["hierarchyPath"] }
+  ]
+}
+

@@ -1,0 +1,31 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityIA.Protocol", "src\UnityIA.Protocol\UnityIA.Protocol.csproj", "{A704E44C-E09E-4B86-99C7-7776651DF36C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityIA.Cli", "src\UnityIA.Cli\UnityIA.Cli.csproj", "{6D7D2A21-EC99-47E6-A206-D1769180DA76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityIA.Protocol.Tests", "tests\UnityIA.Protocol.Tests\UnityIA.Protocol.Tests.csproj", "{22313595-8498-47E9-A84D-FB9AE9A5ED10}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A704E44C-E09E-4B86-99C7-7776651DF36C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A704E44C-E09E-4B86-99C7-7776651DF36C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A704E44C-E09E-4B86-99C7-7776651DF36C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A704E44C-E09E-4B86-99C7-7776651DF36C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D7D2A21-EC99-47E6-A206-D1769180DA76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D7D2A21-EC99-47E6-A206-D1769180DA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D7D2A21-EC99-47E6-A206-D1769180DA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D7D2A21-EC99-47E6-A206-D1769180DA76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22313595-8498-47E9-A84D-FB9AE9A5ED10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22313595-8498-47E9-A84D-FB9AE9A5ED10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22313595-8498-47E9-A84D-FB9AE9A5ED10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22313595-8498-47E9-A84D-FB9AE9A5ED10}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+

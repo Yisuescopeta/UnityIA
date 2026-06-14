@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    { "$ref": "../common/mutation-command.schema.json" },
+    {
+      "properties": {
+        "command": { "const": "scene.object.rename" },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target", "name"],
+          "properties": {
+            "target": { "$ref": "../common/object-reference.schema.json" },
+            "name": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        }
+      }
+    }
+  ]
+}
+

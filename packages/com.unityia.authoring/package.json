@@ -1,0 +1,20 @@
+{
+  "name": "com.unityia.authoring",
+  "version": "0.1.0",
+  "displayName": "UnityIA Authoring",
+  "description": "Controlled, auditable authoring APIs and live transport for the Unity Editor.",
+  "unity": "6000.3",
+  "author": {
+    "name": "UnityIA"
+  },
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.2",
+    "com.unity.test-framework": "1.4.6"
+  },
+  "keywords": [
+    "authoring",
+    "automation",
+    "editor"
+  ]
+}
+

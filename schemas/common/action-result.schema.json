@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unityia.dev/schemas/common/action-result.schema.json",
+  "title": "UnityIA ActionResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["success", "message", "code", "data"],
+  "properties": {
+    "success": { "type": "boolean" },
+    "message": { "type": "string" },
+    "code": { "type": "string", "minLength": 1 },
+    "data": { "type": "object" }
+  }
+}
+

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Any UnityIA v0.1 command",
+  "oneOf": [
+    { "$ref": "system.status.schema.json" },
+    { "$ref": "system.commands.list.schema.json" },
+    { "$ref": "context.get.schema.json" },
+    { "$ref": "scene.list-open.schema.json" },
+    { "$ref": "scene.hierarchy.get.schema.json" },
+    { "$ref": "scene.object.get.schema.json" },
+    { "$ref": "scene.object.create-empty.schema.json" },
+    { "$ref": "scene.object.rename.schema.json" },
+    { "$ref": "scene.object.set-active.schema.json" },
+    { "$ref": "scene.object.set-transform.schema.json" },
+    { "$ref": "scene.object.reparent.schema.json" },
+    { "$ref": "scene.object.delete.schema.json" },
+    { "$ref": "scene.save.schema.json" },
+    { "$ref": "validation.command.validate.schema.json" },
+    { "$ref": "permissions.explain.schema.json" }
+  ]
+}
+

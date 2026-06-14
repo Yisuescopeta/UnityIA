@@ -1,0 +1,13 @@
+.vs/
+.vscode/
+.idea/
+**/bin/
+**/obj/
+TestResults/
+coverage/
+.unityia/audit/
+.unityia/sessions/
+Sandbox/
+*.user
+*.suo
+

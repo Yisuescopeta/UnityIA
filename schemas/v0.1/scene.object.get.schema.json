@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    { "$ref": "../common/command-base.schema.json" },
+    {
+      "properties": {
+        "command": { "const": "scene.object.get" },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target"],
+          "properties": {
+            "target": { "$ref": "../common/object-reference.schema.json" }
+          }
+        }
+      }
+    }
+  ]
+}
+

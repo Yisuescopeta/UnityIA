@@ -1,0 +1,27 @@
+{
+  "protocolVersion": "0.1",
+  "commandId": "98ae2d5d-3a76-49e5-89a0-cad6788d9648",
+  "command": "scene.object.set-transform",
+  "issuedAtUtc": "2026-06-14T12:00:00Z",
+  "preconditions": {
+    "sessionId": "replace-with-live-session-id",
+    "editorMode": "edit",
+    "activeScenePath": "Assets/Scenes/Main.unity",
+    "contextVersion": 1
+  },
+  "arguments": {
+    "target": {
+      "hierarchyPath": "/Environment/Lights/Sun",
+      "scenePath": "Assets/Scenes/Main.unity"
+    },
+    "rotationEuler": {
+      "x": 50,
+      "y": -30,
+      "z": 0
+    }
+  },
+  "options": {
+    "dryRun": false
+  }
+}
+

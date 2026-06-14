@@ -1,0 +1,14 @@
+{
+  "name": "UnityIA.DeveloperUI.Editor",
+  "rootNamespace": "UnityIA",
+  "references": [
+    "UnityIA.Contracts.Editor",
+    "UnityIA.Core.Editor",
+    "Unity.Newtonsoft.Json"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}
+

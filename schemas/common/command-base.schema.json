@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unityia.dev/schemas/common/command-base.schema.json",
+  "title": "UnityIA command envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocolVersion",
+    "commandId",
+    "command",
+    "issuedAtUtc",
+    "arguments",
+    "options"
+  ],
+  "properties": {
+    "protocolVersion": { "const": "0.1" },
+    "commandId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuedAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "preconditions": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": { "type": ["string", "null"] },
+        "editorMode": { "type": ["string", "null"], "enum": ["edit", "play", null] },
+        "activeScenePath": { "type": ["string", "null"] },
+        "contextVersion": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "arguments": { "type": "object" },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dryRun": { "type": "boolean", "default": false }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unityia.dev/schemas/common/policy.schema.json",
+  "title": "UnityIA project policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "allow", "paths"],
+  "properties": {
+    "version": { "const": "0.1" },
+    "allow": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "scene.read",
+          "scene.modify",
+          "scene.save",
+          "asset.read",
+          "asset.create",
+          "asset.modify",
+          "asset.delete",
+          "prefab.modify",
+          "playmode.control",
+          "tests.run"
+        ]
+      }
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["read", "write"],
+      "properties": {
+        "read": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^Assets/" }
+        },
+        "write": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^Assets/" }
+        }
+      }
+    }
+  }
+}
+

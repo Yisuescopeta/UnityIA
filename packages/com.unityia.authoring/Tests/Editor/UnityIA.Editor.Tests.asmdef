@@ -1,0 +1,22 @@
+{
+  "name": "UnityIA.Editor.Tests",
+  "rootNamespace": "UnityIA.Tests",
+  "references": [
+    "UnityIA.Contracts.Editor",
+    "UnityIA.Core.Editor",
+    "UnityIA.Context.Editor",
+    "UnityIA.Authoring.Editor",
+    "Unity.Newtonsoft.Json"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "Newtonsoft.Json.dll"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false
+}

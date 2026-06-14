@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unityia.dev/schemas/common/vector3.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["x", "y", "z"],
+  "properties": {
+    "x": { "type": "number" },
+    "y": { "type": "number" },
+    "z": { "type": "number" }
+  }
+}
+

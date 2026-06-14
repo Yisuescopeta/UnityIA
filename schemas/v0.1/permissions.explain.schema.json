@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    { "$ref": "../common/command-base.schema.json" },
+    {
+      "properties": {
+        "command": { "const": "permissions.explain" },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["capability"],
+          "properties": {
+            "capability": { "type": "string", "minLength": 1 },
+            "path": { "type": ["string", "null"] }
+          }
+        }
+      }
+    }
+  ]
+}
+
