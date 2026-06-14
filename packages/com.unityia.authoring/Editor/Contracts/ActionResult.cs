@@ -54,7 +54,7 @@ namespace UnityIA.Contracts
             };
         }
 
-        public static ActionResult<TData> Ok<TData>(string message, TData data)
+        internal static ActionResult<TData> Ok<TData>(string message, TData data)
         {
             return new ActionResult<TData>
             {
@@ -65,7 +65,7 @@ namespace UnityIA.Contracts
             };
         }
 
-        public static ActionResult<TData> Error<TData>(string code, string message, TData data)
+        internal static ActionResult<TData> Error<TData>(string code, string message, TData data)
         {
             return new ActionResult<TData>
             {
@@ -102,4 +102,3 @@ namespace UnityIA.Contracts
         }
     }
 }
-

@@ -1,21 +1,26 @@
-# Catálogo inicial de comandos
+# Catalogo inicial de comandos
 
-## Estado del catálogo
+## Estado del catalogo
 
-Esta página define nombres reservados y contratos objetivo. Los comandos
-enumerados aquí **todavía no se consideran implementados**, aunque el
-repositorio pueda contener prototipos con nombres o comportamientos parecidos.
+Esta pagina define nombres reservados y contratos objetivo. Los comandos
+enumerados aqui todavia no se consideran implementados, aunque el repositorio
+pueda contener prototipos con nombres o comportamientos parecidos.
 
-Un comando pasa a estado implementado únicamente cuando:
+Un comando pasa a estado implementado unicamente cuando:
 
 1. existe su DTO y validador;
-2. está registrado públicamente;
-3. aplica permisos y auditoría;
+2. esta registrado publicamente;
+3. aplica permisos y auditoria;
 4. devuelve `ActionResult`;
 5. tiene pruebas de contrato y comportamiento;
-6. la documentación indica la versión que lo entrega.
+6. la documentacion indica la version que lo entrega.
 
-## Envelope común objetivo
+El paquete actual puede incluir comandos tecnicos de prototipo como
+`system.status`, `system.commands.list` o `scene.object.*`. Esos comandos
+sirven para validar piezas del dispatcher y del package base; no equivalen al
+catalogo publico reservado de authoring.
+
+## Envelope comun objetivo
 
 ```json
 {
@@ -31,38 +36,38 @@ Un comando pasa a estado implementado únicamente cuando:
 }
 ```
 
-No se permiten nombres de métodos, tipos arbitrarios, código C# ni comandos de
+No se permiten nombres de metodos, tipos arbitrarios, codigo C# ni comandos de
 shell dentro de `arguments`.
 
 ## `context.snapshot`
 
-**Tipo:** lectura  
-**Capacidad prevista:** `context.read`  
-**Versión objetivo:** v0.3
+**Tipo:** lectura
+**Capacidad prevista:** `context.read`
+**Version objetivo:** v0.3
 
-Devuelve una instantánea serializable del contexto de authoring:
+Devuelve una instantanea serializable del contexto de authoring:
 
-- sesión y versión del contexto;
+- sesion y version del contexto;
 - modo del Editor;
 - escena activa;
 - escenas abiertas;
-- selección actual cuando sea seguro exponerla;
-- referencias de objetos mediante ruta y un identificador estable cuando esté
+- seleccion actual cuando sea seguro exponerla;
+- referencias de objetos mediante ruta y un identificador estable cuando este
   disponible.
 
 No modifica el proyecto.
 
 ## `capabilities.list`
 
-**Tipo:** lectura  
-**Capacidad prevista:** ninguna para consultar el catálogo público  
-**Versión objetivo:** v0.6
+**Tipo:** lectura
+**Capacidad prevista:** `capabilities.read`
+**Version objetivo:** v0.6
 
-Enumera las capacidades y comandos registrados en la sesión, incluyendo:
+Enumera las capacidades y comandos registrados en la sesion, incluyendo:
 
-- versión del protocolo;
+- version del protocolo;
 - disponibilidad por modo live o batch;
-- si una operación es mutadora;
+- si una operacion es mutadora;
 - permiso requerido;
 - estado implementado o no disponible;
 - restricciones relevantes.
@@ -71,39 +76,40 @@ No debe revelar tokens, rutas sensibles ni handlers internos.
 
 ## `authoring.create_gameobject`
 
-**Tipo:** mutación  
-**Capacidad prevista:** `scene.gameobject.create`  
-**Versión objetivo:** v0.3
+**Tipo:** mutacion
+**Capacidad prevista:** `scene.gameobject.create`
+**Version objetivo:** v0.3
 
-Crea un `GameObject` vacío en una escena autorizada. Sus argumentos mínimos
+Crea un `GameObject` vacio en una escena autorizada. Sus argumentos minimos
 previstos son nombre, escena esperada, padre opcional y transform inicial
 opcional.
 
-La operación debe:
+La operacion debe:
 
 - exigir Edit Mode y contexto vigente;
 - usar Undo;
 - rechazar escenas sin persistir cuando la identidad lo requiera;
 - dejar la escena sucia;
-- no guardar automáticamente;
+- no guardar automaticamente;
 - devolver una referencia serializable al objeto creado.
 
 ## `authoring.add_component`
 
-**Tipo:** mutación  
-**Capacidad prevista:** `scene.component.add`  
-**Versión objetivo:** v0.3
+**Tipo:** mutacion
+**Capacidad prevista:** `scene.component.add`
+**Version objetivo:** v0.3
 
-Añade un componente de un catálogo permitido a un `GameObject` existente.
+Anade un componente de un catalogo permitido a un `GameObject` existente.
 
-No acepta nombres de tipos arbitrarios. Cada componente habilitado debe tener un
-adaptador o registro explícito, validación propia y política de compatibilidad.
+No acepta nombres de tipos arbitrarios. Cada componente habilitado debe tener
+un adaptador o registro explicito, validacion propia y politica de
+compatibilidad.
 
 ## `authoring.set_component_field`
 
-**Tipo:** mutación  
-**Capacidad prevista:** `scene.component.write`  
-**Versión objetivo:** v0.3
+**Tipo:** mutacion
+**Capacidad prevista:** `scene.component.write`
+**Version objetivo:** v0.3
 
 Modifica un campo autorizado de un componente registrado. El contrato debe
 identificar:
@@ -114,19 +120,19 @@ identificar:
 - valor serializable con tipo validado;
 - contexto esperado.
 
-No proporciona acceso genérico al `SerializedObject` ni a cualquier propiedad
-descubierta dinámicamente.
+No proporciona acceso generico al `SerializedObject` ni a cualquier propiedad
+descubierta dinamicamente.
 
 ## `validate.active_scene`
 
-**Tipo:** verificación  
-**Capacidad prevista:** `validation.scene.run`  
-**Versión objetivo:** v0.5, ampliado en v0.6
+**Tipo:** verificacion
+**Capacidad prevista:** `validation.scene.run`
+**Version objetivo:** v0.5, ampliado en v0.6
 
 Ejecuta validadores registrados sobre la escena activa y devuelve resultados
-estructurados sin corregir automáticamente los problemas.
+estructurados sin corregir automaticamente los problemas.
 
-Los resultados deben diferenciar errores, warnings e información, e identificar
+Los resultados deben diferenciar errores, warnings e informacion, e identificar
 el validador y el objeto afectado cuando sea posible.
 
 ## Convenciones
@@ -134,7 +140,9 @@ el validador y el objeto afectado cuando sea posible.
 - Lecturas no mutan ni guardan.
 - Mutaciones requieren precondiciones y permiso.
 - `dryRun` valida sin ejecutar cuando el handler lo soporte.
-- Los comandos no se agrupan implícitamente en transacciones.
+- Los comandos no se agrupan implicitamente en transacciones.
+- Reutilizar un `commandId` con el mismo payload devuelve el resultado terminal
+  conocido.
+- Reutilizar un `commandId` con otro payload debe fallar cerrado.
 - Un comando desconocido debe fallar cerrado.
-- Cambiar un contrato incompatible requiere una nueva versión de protocolo.
-
+- Cambiar un contrato incompatible requiere una nueva version de protocolo.

@@ -2,27 +2,28 @@
 
 UnityIA es un copiloto de authoring controlado para el Unity Editor.
 
-UnityIA no es un agente libre capaz de programar cualquier juego, ejecutar código
-arbitrario o modificar un proyecto Unity sin restricciones. Su propósito es
-permitir que agentes, herramientas y pruebas soliciten operaciones pequeñas y
-auditables a través de contratos públicos mantenidos por UnityIA.
+UnityIA no es un agente libre capaz de programar cualquier juego, ejecutar
+codigo arbitrario o modificar un proyecto Unity sin restricciones. Su
+proposito es permitir que agentes, herramientas y pruebas soliciten operaciones
+pequenas y auditables a traves de contratos publicos mantenidos por UnityIA.
 
 ## Principio rector
 
-Toda acción automatizada debe seguir una ruta controlada:
+Toda accion automatizada debe seguir una ruta controlada:
 
 ```text
 Agente o usuario
   -> unityia CLI o interfaz autorizada
   -> comando estructurado y versionado
-  -> validación
+  -> validacion
   -> permisos
-  -> UnityIAAuthoringAPI
-  -> API pública del Unity Editor
-  -> ActionResult serializable y auditoría
+  -> CommandDispatcher
+  -> UnityIAAuthoringAPI o facade equivalente
+  -> API publica del Unity Editor
+  -> ActionResult serializable y auditoria
 ```
 
-La automatización no debe editar directamente YAML, archivos `.meta`,
+La automatizacion no debe editar directamente YAML, archivos `.meta`,
 `Library`, `ProjectSettings` o `Packages`. Tampoco debe disponer de shell
 arbitrario ni generar scripts C# como mecanismo de escape.
 
@@ -33,21 +34,32 @@ arbitrario ni generar scripts C# como mecanismo de escape.
 | Unity Scene, Prefab y Asset | Fuente persistente de verdad |
 | Estado del Unity Editor | Estado editable de authoring |
 | Play Mode | Runtime temporal, no fuente persistente |
-| `UnityIAAuthoringAPI` | Fachada pública para mutaciones autorizadas |
-| `unityia` CLI | Entrada externa para agentes y automatización |
-| Validation y Test APIs | Verificación previa y posterior |
+| `UnityIAAuthoringAPI` | Fachada publica para mutaciones autorizadas |
+| `CommandDispatcher` | Nucleo que coordina validacion, permisos, auditoria e idempotencia |
+| `unityia` CLI | Entrada externa para agentes y automatizacion |
+| Validation y Test APIs | Verificacion previa y posterior |
 | Protocolo JSON | Contrato versionado entre clientes y Unity |
 
 ## Estado actual y contrato objetivo
 
-Este repositorio contiene documentación y un prototipo técnico no consolidado.
-La documentación de nivel superior en `docs/*.md` define el **contrato
-objetivo** y la gobernanza que deben guiar el desarrollo.
+Este repositorio contiene documentacion y un prototipo tecnico no consolidado.
+La documentacion de nivel superior en `docs/*.md` define el contrato objetivo y
+la gobernanza que deben guiar el desarrollo.
+
+En el roadmap actual:
+
+- `v0.1` = foundation documental, protocolo base y contratos minimos.
+- `v0.2` = package base de Unity y piezas tecnicas de soporte.
+- `v0.3` = primera Authoring API controlada.
+
+El paquete actual en `packages/com.unityia.authoring` pertenece a esa base
+tecnica. No debe describirse como una implementacion completa del protocolo de
+authoring ni como una entrega cerrada de `v0.3`.
 
 La existencia de una clase, schema o comando experimental en el repositorio no
 lo convierte en API estable. En particular, los comandos documentados para la
-primera interfaz pública están **reservados pero todavía no se consideran
-implementados**:
+primera interfaz publica estan reservados pero todavia no se consideran
+implementados:
 
 - `context.snapshot`
 - `capabilities.list`
@@ -56,10 +68,14 @@ implementados**:
 - `authoring.set_component_field`
 - `validate.active_scene`
 
+Un comando solo pasa de reservado a implementado cuando existe su DTO,
+validador, registro publico, permisos, auditoria, `ActionResult` estable y
+pruebas verificadas.
+
 Consultar [docs/commands.md](docs/commands.md) antes de implementar o consumir
 un comando.
 
-## Documentación
+## Documentacion
 
 - [Arquitectura](docs/architecture.md)
 - [CLI](docs/cli.md)
@@ -70,9 +86,9 @@ un comando.
 
 ## Reglas para agentes Codex
 
-1. Leer esta documentación antes de modificar arquitectura o contratos.
-2. No acceder a internals de UnityIA para evitar una API pública.
-3. No introducir IA, generación de C# o shell antes de la fase correspondiente.
+1. Leer esta documentacion antes de modificar arquitectura o contratos.
+2. No acceder a internals de UnityIA para evitar saltarse la API publica.
+3. No introducir IA, generacion de C# o shell antes de la fase correspondiente.
 4. Mantener separados el estado implementado y el contrato planificado.
-5. Añadir documentación y pruebas junto con cada capacidad pública.
+5. Anadir documentacion y pruebas junto con cada capacidad publica.
 6. Tratar cualquier capacidad no documentada como denegada.

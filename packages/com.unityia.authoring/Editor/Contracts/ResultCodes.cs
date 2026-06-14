@@ -9,6 +9,7 @@ namespace UnityIA.Contracts
         public const string ValidationFailed = "VALIDATION_FAILED";
         public const string PermissionDenied = "PERMISSION_DENIED";
         public const string PathNotAllowed = "PATH_NOT_ALLOWED";
+        public const string IdempotencyConflict = "IDEMPOTENCY_CONFLICT";
         public const string InvalidEditorState = "INVALID_EDITOR_STATE";
         public const string StaleContext = "STALE_CONTEXT";
         public const string AmbiguousTarget = "AMBIGUOUS_TARGET";
@@ -21,4 +22,3 @@ namespace UnityIA.Contracts
         public const string InternalError = "INTERNAL_ERROR";
     }
 }
-

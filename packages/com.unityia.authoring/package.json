@@ -2,7 +2,7 @@
   "name": "com.unityia.authoring",
   "version": "0.1.0",
   "displayName": "UnityIA Authoring",
-  "description": "Controlled, auditable authoring APIs and live transport for the Unity Editor.",
+  "description": "Controlled, auditable UnityIA package base for dispatcher, contracts, tests, and editor transport foundations.",
   "unity": "6000.3",
   "author": {
     "name": "UnityIA"
@@ -17,4 +17,3 @@
     "editor"
   ]
 }
-

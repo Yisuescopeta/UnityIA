@@ -38,7 +38,7 @@ namespace UnityIA.Core
 
     internal sealed class CommandsListHandler : CommandHandler<EmptyArguments>
     {
-        public CommandsListHandler() : base("system.commands.list", false, string.Empty)
+        public CommandsListHandler() : base("system.commands.list", false, "capabilities.read")
         {
         }
 
@@ -132,4 +132,3 @@ namespace UnityIA.Core
         }
     }
 }
-

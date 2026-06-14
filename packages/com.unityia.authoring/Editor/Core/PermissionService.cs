@@ -34,8 +34,8 @@ namespace UnityIA.Core
         private static readonly HashSet<string> DefaultReadCapabilities =
             new HashSet<string>(StringComparer.Ordinal)
             {
-                "scene.read",
-                "asset.read"
+                "capabilities.read",
+                "context.read"
             };
 
         private readonly string projectRoot;
@@ -84,7 +84,7 @@ namespace UnityIA.Core
 
                 bool write = IsWriteCapability(request.Capability);
                 IReadOnlyList<string> patterns = write ? policy.Paths.Write : policy.Paths.Read;
-                if (source == "default" || !MatchesAny(normalized, patterns))
+                if (!MatchesAny(normalized, patterns))
                 {
                     return Decision(
                         false,
@@ -257,8 +257,11 @@ namespace UnityIA.Core
 
         private static bool IsWriteCapability(string capability)
         {
+            // TODO: Replace suffix inference with explicit path access metadata on command descriptors.
             return capability.EndsWith(".modify", StringComparison.Ordinal) ||
                    capability.EndsWith(".create", StringComparison.Ordinal) ||
+                   capability.EndsWith(".add", StringComparison.Ordinal) ||
+                   capability.EndsWith(".write", StringComparison.Ordinal) ||
                    capability.EndsWith(".delete", StringComparison.Ordinal) ||
                    capability.Equals("scene.save", StringComparison.Ordinal) ||
                    capability.Equals("prefab.modify", StringComparison.Ordinal);

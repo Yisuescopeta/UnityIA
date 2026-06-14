@@ -29,6 +29,7 @@ namespace UnityIA.Core
         {
             EditorApplication.hierarchyChanged += Advance;
             EditorApplication.projectChanged += Advance;
+            Selection.selectionChanged += Advance;
             Undo.undoRedoPerformed += Advance;
             EditorSceneManager.sceneOpened += OnSceneOpened;
             EditorSceneManager.sceneClosed += OnSceneClosed;
@@ -83,4 +84,3 @@ namespace UnityIA.Core
         }
     }
 }
-

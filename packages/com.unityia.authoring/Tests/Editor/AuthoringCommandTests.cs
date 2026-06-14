@@ -86,6 +86,26 @@ namespace UnityIA.Tests
             Assert.That(SceneManager.GetActiveScene().isDirty, Is.False);
         }
 
+        [Test]
+        public void ContextVersionAdvancesWhenSelectionChanges()
+        {
+            GameObject gameObject = new GameObject("UnityIASelectionProbe");
+            try
+            {
+                Selection.activeObject = null;
+                long before = EditorStateTracker.ContextVersion;
+
+                Selection.activeObject = gameObject;
+
+                Assert.That(EditorStateTracker.ContextVersion, Is.GreaterThan(before));
+            }
+            finally
+            {
+                Selection.activeObject = null;
+                UnityEngine.Object.DestroyImmediate(gameObject);
+            }
+        }
+
         private static CommandEnvelope MutationEnvelope(string command, JObject arguments)
         {
             return new CommandEnvelope

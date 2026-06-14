@@ -11,8 +11,8 @@ namespace UnityIA.Core
         private readonly CommandRegistry registry;
         private readonly PermissionService permissions;
         private readonly AuditService audit;
-        private readonly Dictionary<string, ActionResult<JObject>> idempotency =
-            new Dictionary<string, ActionResult<JObject>>(StringComparer.Ordinal);
+        private readonly Dictionary<string, StoredCommandResult> idempotency =
+            new Dictionary<string, StoredCommandResult>(StringComparer.Ordinal);
 
         public CommandDispatcher(
             CommandRegistry registry,
@@ -76,18 +76,39 @@ namespace UnityIA.Core
 
         public ActionResult<JObject> Execute(CommandEnvelope envelope)
         {
+            string canonicalHash = null;
             if (envelope != null &&
-                !string.IsNullOrWhiteSpace(envelope.CommandId) &&
-                idempotency.TryGetValue(envelope.CommandId, out ActionResult<JObject> previous))
+                !string.IsNullOrWhiteSpace(envelope.CommandId))
             {
-                return previous;
+                canonicalHash = CommandJson.ComputeCanonicalHash(envelope);
+                if (idempotency.TryGetValue(envelope.CommandId, out StoredCommandResult previous))
+                {
+                    if (string.Equals(
+                            previous.CanonicalHash,
+                            canonicalHash,
+                            StringComparison.Ordinal))
+                    {
+                        return previous.Result;
+                    }
+
+                    return Decorate(
+                        Results.Error(
+                            ResultCodes.IdempotencyConflict,
+                            "commandId was already used for a different command envelope.",
+                            new JObject
+                            {
+                                ["storedHash"] = previous.CanonicalHash,
+                                ["requestHash"] = canonicalHash
+                            }),
+                        envelope);
+                }
             }
 
             ICommandHandler handler;
             ActionResult<JObject> baseValidation = ValidateEnvelope(envelope, out handler);
             if (!baseValidation.Success)
             {
-                return CompleteWithoutHandler(envelope, baseValidation);
+                return CompleteWithoutHandler(envelope, canonicalHash, baseValidation);
             }
 
             CommandExecutionContext context = new CommandExecutionContext(handler.Descriptor);
@@ -133,6 +154,7 @@ namespace UnityIA.Core
             {
                 return Store(
                     envelope,
+                    canonicalHash,
                     Decorate(
                         Results.Error(
                             ResultCodes.AuditUnavailable,
@@ -161,7 +183,7 @@ namespace UnityIA.Core
                     Results.AddWarning(dryRun, "Audit is degraded: " + auditError);
                 }
 
-                return Store(envelope, dryRun);
+                return Store(envelope, canonicalHash, dryRun);
             }
 
             int undoGroup = -1;
@@ -224,7 +246,7 @@ namespace UnityIA.Core
                 Undo.CollapseUndoOperations(undoGroup);
             }
 
-            return Store(envelope, result);
+            return Store(envelope, canonicalHash, result);
         }
 
         private ActionResult<JObject> ValidateEnvelope(
@@ -277,9 +299,10 @@ namespace UnityIA.Core
 
         private ActionResult<JObject> CompleteWithoutHandler(
             CommandEnvelope envelope,
+            string canonicalHash,
             ActionResult<JObject> result)
         {
-            return Store(envelope, Decorate(result, envelope));
+            return Store(envelope, canonicalHash, Decorate(result, envelope));
         }
 
         private ActionResult<JObject> Complete(
@@ -295,16 +318,22 @@ namespace UnityIA.Core
                 Results.AddWarning(result, "Audit is degraded: " + auditError);
             }
 
-            return Store(envelope, result);
+            return Store(
+                envelope,
+                envelope == null ? null : CommandJson.ComputeCanonicalHash(envelope),
+                result);
         }
 
         private ActionResult<JObject> Store(
             CommandEnvelope envelope,
+            string canonicalHash,
             ActionResult<JObject> result)
         {
             if (envelope != null && !string.IsNullOrWhiteSpace(envelope.CommandId))
             {
-                idempotency[envelope.CommandId] = result;
+                idempotency[envelope.CommandId] = new StoredCommandResult(
+                    canonicalHash ?? CommandJson.ComputeCanonicalHash(envelope),
+                    result);
             }
 
             return result;
@@ -343,6 +372,18 @@ namespace UnityIA.Core
             return envelope.Preconditions == null
                 ? null
                 : envelope.Preconditions.ActiveScenePath;
+        }
+
+        private sealed class StoredCommandResult
+        {
+            public StoredCommandResult(string canonicalHash, ActionResult<JObject> result)
+            {
+                CanonicalHash = canonicalHash ?? string.Empty;
+                Result = result;
+            }
+
+            public string CanonicalHash { get; }
+            public ActionResult<JObject> Result { get; }
         }
     }
 }

@@ -19,7 +19,7 @@ namespace UnityIA.Context
 
     internal sealed class ContextGetHandler : CommandHandler<ContextQuery>
     {
-        public ContextGetHandler() : base("context.get", false, "scene.read")
+        public ContextGetHandler() : base("context.get", false, "context.read")
         {
         }
 
@@ -34,7 +34,7 @@ namespace UnityIA.Context
 
     internal sealed class SceneListOpenHandler : CommandHandler<EmptyArguments>
     {
-        public SceneListOpenHandler() : base("scene.list-open", false, "scene.read")
+        public SceneListOpenHandler() : base("scene.list-open", false, "context.read")
         {
         }
 
@@ -51,7 +51,7 @@ namespace UnityIA.Context
 
     internal sealed class SceneHierarchyHandler : CommandHandler<HierarchyQuery>
     {
-        public SceneHierarchyHandler() : base("scene.hierarchy.get", false, "scene.read")
+        public SceneHierarchyHandler() : base("scene.hierarchy.get", false, "context.read")
         {
         }
 
@@ -66,7 +66,7 @@ namespace UnityIA.Context
 
     internal sealed class SceneObjectGetHandler : CommandHandler<SceneObjectQuery>
     {
-        public SceneObjectGetHandler() : base("scene.object.get", false, "scene.read")
+        public SceneObjectGetHandler() : base("scene.object.get", false, "context.read")
         {
         }
 
@@ -89,4 +89,3 @@ namespace UnityIA.Context
         }
     }
 }
-

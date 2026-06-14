@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -126,6 +129,69 @@ namespace UnityIA.Contracts
         {
             return JsonConvert.SerializeObject(value, formatting, StrictSettings);
         }
+
+        public static string ComputeCanonicalHash(CommandEnvelope envelope)
+        {
+            if (envelope == null)
+            {
+                return string.Empty;
+            }
+
+            JsonSerializer serializer = JsonSerializer.Create(StrictSettings);
+            CommandEnvelope normalized = new CommandEnvelope
+            {
+                ProtocolVersion = envelope.ProtocolVersion,
+                CommandId = envelope.CommandId,
+                Command = envelope.Command,
+                IssuedAtUtc = envelope.IssuedAtUtc,
+                Preconditions = envelope.Preconditions,
+                Arguments = envelope.Arguments ?? new JObject(),
+                Options = envelope.Options ?? new CommandOptions()
+            };
+
+            JToken token = JToken.FromObject(normalized, serializer);
+            string canonicalJson = Canonicalize(token).ToString(Formatting.None);
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(canonicalJson);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return string.Concat(hash.Select(value => value.ToString("x2")));
+            }
+        }
+
+        private static JToken Canonicalize(JToken token)
+        {
+            if (token == null)
+            {
+                return JValue.CreateNull();
+            }
+
+            if (token.Type == JTokenType.Object)
+            {
+                JObject source = (JObject)token;
+                JObject canonical = new JObject();
+                foreach (JProperty property in source.Properties()
+                             .OrderBy(property => property.Name, StringComparer.Ordinal))
+                {
+                    canonical.Add(property.Name, Canonicalize(property.Value));
+                }
+
+                return canonical;
+            }
+
+            if (token.Type == JTokenType.Array)
+            {
+                JArray source = (JArray)token;
+                JArray canonical = new JArray();
+                foreach (JToken item in source)
+                {
+                    canonical.Add(Canonicalize(item));
+                }
+
+                return canonical;
+            }
+
+            return token.DeepClone();
+        }
     }
 }
-

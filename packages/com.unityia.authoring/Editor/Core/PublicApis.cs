@@ -27,25 +27,27 @@ namespace UnityIA
 
     public static class UnityIAPermissionsAPI
     {
-        public static ActionResult<PermissionDecision> Evaluate(PermissionRequest request)
+        public static ActionResult<JObject> Evaluate(PermissionRequest request)
         {
             PermissionDecision decision = Core.CoreServices.Permissions.Evaluate(request);
             return decision.Allowed
-                ? Results.Ok("Permission granted.", decision)
-                : Results.Error(ResultCodes.PermissionDenied, decision.Reason, decision);
+                ? Results.Ok("Permission granted.", JObject.FromObject(decision))
+                : Results.Error(
+                    ResultCodes.PermissionDenied,
+                    decision.Reason,
+                    JObject.FromObject(decision));
         }
 
-        public static ActionResult<EffectivePolicy> GetEffectivePolicy()
+        public static ActionResult<JObject> GetEffectivePolicy()
         {
             return Results.Ok(
                 "Effective policy.",
-                Core.CoreServices.Permissions.GetEffectivePolicy());
+                JObject.FromObject(Core.CoreServices.Permissions.GetEffectivePolicy()));
         }
 
-        public static ActionResult<PermissionDecision> Explain(PermissionRequest request)
+        public static ActionResult<JObject> Explain(PermissionRequest request)
         {
             return Evaluate(request);
         }
     }
 }
-

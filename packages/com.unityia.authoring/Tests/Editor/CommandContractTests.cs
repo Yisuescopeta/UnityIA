@@ -77,6 +77,62 @@ namespace UnityIA.Tests
             Assert.That(second.Data["commandId"]?.Value<string>(), Is.EqualTo(envelope.CommandId));
             Assert.That(second, Is.SameAs(first));
         }
+
+        [Test]
+        public void ReusedCommandIdWithDifferentPayloadReturnsConflict()
+        {
+            string commandId = Guid.NewGuid().ToString("D");
+            CommandEnvelope firstEnvelope = new CommandEnvelope
+            {
+                ProtocolVersion = EditorSession.ProtocolVersion,
+                CommandId = commandId,
+                Command = "system.status",
+                IssuedAtUtc = DateTimeOffset.UtcNow,
+                Arguments = new JObject(),
+                Options = new CommandOptions()
+            };
+            CommandEnvelope secondEnvelope = new CommandEnvelope
+            {
+                ProtocolVersion = EditorSession.ProtocolVersion,
+                CommandId = commandId,
+                Command = "system.commands.list",
+                IssuedAtUtc = firstEnvelope.IssuedAtUtc,
+                Arguments = new JObject(),
+                Options = new CommandOptions()
+            };
+
+            ActionResult<JObject> first = CoreServices.Dispatcher.Execute(firstEnvelope);
+            ActionResult<JObject> second = CoreServices.Dispatcher.Execute(secondEnvelope);
+
+            Assert.That(first.Success, Is.True);
+            Assert.That(second.Success, Is.False);
+            Assert.That(second.Code, Is.EqualTo(ResultCodes.IdempotencyConflict));
+            Assert.That(second.Data["commandId"]?.Value<string>(), Is.EqualTo(commandId));
+            Assert.That(second.Data["storedHash"]?.Value<string>(), Is.Not.Empty);
+            Assert.That(second.Data["requestHash"]?.Value<string>(), Is.Not.Empty);
+        }
+
+        [Test]
+        public void PublicPermissionApisAlwaysReturnObjectData()
+        {
+            ActionResult<JObject> granted = UnityIAPermissionsAPI.Evaluate(
+                new PermissionRequest
+                {
+                    Capability = "context.read"
+                });
+            ActionResult<JObject> denied = UnityIAPermissionsAPI.Evaluate(
+                new PermissionRequest
+                {
+                    Capability = "scene.component.write",
+                    Path = "Assets/Scenes/Main.unity"
+                });
+
+            Assert.That(granted.Data, Is.Not.Null);
+            Assert.That(granted.Data.Type, Is.EqualTo(JTokenType.Object));
+            Assert.That(granted.Data["warnings"], Is.Not.Null);
+            Assert.That(denied.Data, Is.Not.Null);
+            Assert.That(denied.Data.Type, Is.EqualTo(JTokenType.Object));
+            Assert.That(denied.Data["warnings"], Is.Not.Null);
+        }
     }
 }
-
