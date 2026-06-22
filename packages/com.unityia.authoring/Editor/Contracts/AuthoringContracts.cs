@@ -67,6 +67,51 @@ namespace UnityIA.Contracts
         public Vector3Dto Scale { get; set; }
     }
 
+    public sealed class CreateGameObjectArguments
+    {
+        [JsonProperty("scenePath", Required = Required.Always)]
+        public string ScenePath { get; set; }
+
+        [JsonProperty("name", Required = Required.Always)]
+        public string Name { get; set; }
+
+        [JsonProperty("parent")]
+        public ObjectReferenceDto Parent { get; set; }
+
+        [JsonProperty("position")]
+        public Vector3Dto Position { get; set; }
+
+        [JsonProperty("rotationEuler")]
+        public Vector3Dto RotationEuler { get; set; }
+
+        [JsonProperty("scale")]
+        public Vector3Dto Scale { get; set; }
+    }
+
+    public sealed class AddComponentArguments
+    {
+        [JsonProperty("target", Required = Required.Always)]
+        public ObjectReferenceDto Target { get; set; }
+
+        [JsonProperty("componentType", Required = Required.Always)]
+        public string ComponentType { get; set; }
+    }
+
+    public sealed class SetComponentFieldArguments
+    {
+        [JsonProperty("target", Required = Required.Always)]
+        public ObjectReferenceDto Target { get; set; }
+
+        [JsonProperty("componentType", Required = Required.Always)]
+        public string ComponentType { get; set; }
+
+        [JsonProperty("field", Required = Required.Always)]
+        public string Field { get; set; }
+
+        [JsonProperty("value", Required = Required.Always)]
+        public JToken Value { get; set; }
+    }
+
     public sealed class RenameArguments
     {
         [JsonProperty("target", Required = Required.Always)]
@@ -129,5 +174,10 @@ namespace UnityIA.Contracts
         [JsonProperty("envelope", Required = Required.Always)]
         public JObject Envelope { get; set; }
     }
-}
 
+    public sealed class ValidateActiveSceneArguments
+    {
+        [JsonProperty("scenePath", Required = Required.Always)]
+        public string ScenePath { get; set; }
+    }
+}

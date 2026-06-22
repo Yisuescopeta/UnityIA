@@ -1,10 +1,14 @@
 {
   "version": "0.1",
+  "authorizationMode": "confirm_actions",
   "allow": [
-    "scene.read",
-    "scene.modify",
+    "context.read",
+    "capabilities.read",
+    "scene.gameobject.create",
+    "scene.component.add",
+    "scene.component.write",
     "scene.save",
-    "asset.read"
+    "validation.scene.run"
   ],
   "paths": {
     "read": [
@@ -15,4 +19,3 @@
     ]
   }
 }
-

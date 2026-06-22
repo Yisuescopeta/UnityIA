@@ -4,10 +4,17 @@
   "oneOf": [
     { "$ref": "system.status.schema.json" },
     { "$ref": "system.commands.list.schema.json" },
+    { "$ref": "capabilities.list.schema.json" },
+    { "$ref": "validate.active_scene.schema.json" },
+    { "$ref": "context.snapshot.schema.json" },
     { "$ref": "context.get.schema.json" },
     { "$ref": "scene.list-open.schema.json" },
     { "$ref": "scene.hierarchy.get.schema.json" },
     { "$ref": "scene.object.get.schema.json" },
+    { "$ref": "authoring.create_gameobject.schema.json" },
+    { "$ref": "authoring.add_component.schema.json" },
+    { "$ref": "authoring.set_component_field.schema.json" },
+    { "$ref": "authoring.save_scene.schema.json" },
     { "$ref": "scene.object.create-empty.schema.json" },
     { "$ref": "scene.object.rename.schema.json" },
     { "$ref": "scene.object.set-active.schema.json" },
@@ -19,4 +26,3 @@
     { "$ref": "permissions.explain.schema.json" }
   ]
 }
-

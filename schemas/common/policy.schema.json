@@ -4,24 +4,25 @@
   "title": "UnityIA project policy",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "allow", "paths"],
+  "required": ["version", "authorizationMode", "allow", "paths"],
   "properties": {
     "version": { "const": "0.1" },
+    "authorizationMode": { "enum": ["confirm_actions"] },
     "allow": {
       "type": "array",
       "uniqueItems": true,
       "items": {
         "enum": [
-          "scene.read",
-          "scene.modify",
+          "context.read",
+          "capabilities.read",
+          "scene.gameobject.create",
+          "scene.component.add",
+          "scene.component.write",
           "scene.save",
-          "asset.read",
-          "asset.create",
-          "asset.modify",
-          "asset.delete",
-          "prefab.modify",
-          "playmode.control",
-          "tests.run"
+          "validation.scene.run",
+          "tests.run",
+          "scene.modify",
+          "prefab.modify"
         ]
       }
     },
@@ -42,4 +43,3 @@
     }
   }
 }
-

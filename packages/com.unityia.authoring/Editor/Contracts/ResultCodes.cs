@@ -17,6 +17,8 @@ namespace UnityIA.Contracts
         public const string EditorBusy = "EDITOR_BUSY";
         public const string SceneNotPersisted = "SCENE_NOT_PERSISTED";
         public const string AuditUnavailable = "AUDIT_UNAVAILABLE";
+        public const string ConfirmationRequired = "CONFIRMATION_REQUIRED";
+        public const string ConfirmationDenied = "CONFIRMATION_DENIED";
         public const string RequestTimeout = "REQUEST_TIMEOUT";
         public const string UnityOperationFailed = "UNITY_OPERATION_FAILED";
         public const string InternalError = "INTERNAL_ERROR";

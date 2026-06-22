@@ -13,6 +13,9 @@ namespace UnityIA.Core
         [JsonProperty("version")]
         public string Version { get; set; }
 
+        [JsonProperty("authorizationMode")]
+        public string AuthorizationMode { get; set; }
+
         [JsonProperty("allow")]
         public List<string> Allow { get; set; } = new List<string>();
 
@@ -49,6 +52,16 @@ namespace UnityIA.Core
 
         public PermissionDecision Evaluate(PermissionRequest request)
         {
+            return Evaluate(request, true);
+        }
+
+        public PermissionDecision EvaluateCapability(PermissionRequest request)
+        {
+            return Evaluate(request, false);
+        }
+
+        private PermissionDecision Evaluate(PermissionRequest request, bool checkPath)
+        {
             if (request == null || string.IsNullOrWhiteSpace(request.Capability))
             {
                 return Decision(false, request, "A capability is required.");
@@ -62,6 +75,12 @@ namespace UnityIA.Core
                 return Decision(false, request, error);
             }
 
+            string pathAccess;
+            if (!TryNormalizePathAccess(request.PathAccess, out pathAccess, out error))
+            {
+                return Decision(false, request, error, policy.AuthorizationMode);
+            }
+
             bool allowed = source == "default"
                 ? DefaultReadCapabilities.Contains(request.Capability)
                 : policy.Allow.Contains(request.Capability, StringComparer.Ordinal);
@@ -71,19 +90,30 @@ namespace UnityIA.Core
                 return Decision(
                     false,
                     request,
-                    "Capability is not allowed by the effective policy.");
+                    "Capability is not allowed by the effective policy.",
+                    policy.AuthorizationMode);
             }
 
-            if (!string.IsNullOrWhiteSpace(request.Path))
+            if (checkPath && !string.IsNullOrWhiteSpace(request.Path))
             {
+                if (pathAccess == CommandPathAccess.None)
+                {
+                    return Decision(
+                        false,
+                        request,
+                        "A content path requires explicit read or write path access metadata.",
+                        policy.AuthorizationMode);
+                }
+
                 string normalized;
                 if (!TryNormalizeAssetsPath(request.Path, out normalized, out error))
                 {
-                    return Decision(false, request, error);
+                    return Decision(false, request, error, policy.AuthorizationMode);
                 }
 
-                bool write = IsWriteCapability(request.Capability);
-                IReadOnlyList<string> patterns = write ? policy.Paths.Write : policy.Paths.Read;
+                IReadOnlyList<string> patterns = pathAccess == CommandPathAccess.Write
+                    ? policy.Paths.Write
+                    : policy.Paths.Read;
                 if (!MatchesAny(normalized, patterns))
                 {
                     return Decision(
@@ -91,19 +121,37 @@ namespace UnityIA.Core
                         new PermissionRequest
                         {
                             Capability = request.Capability,
-                            Path = normalized
+                            Path = normalized,
+                            PathAccess = pathAccess
                         },
-                        "Path is not allowed by the effective policy.");
+                        "Path is not allowed by the effective policy.",
+                        policy.AuthorizationMode);
                 }
 
                 request = new PermissionRequest
                 {
                     Capability = request.Capability,
-                    Path = normalized
+                    Path = normalized,
+                    PathAccess = pathAccess
+                };
+            }
+            else
+            {
+                request = new PermissionRequest
+                {
+                    Capability = request.Capability,
+                    Path = request.Path,
+                    PathAccess = pathAccess
                 };
             }
 
-            return Decision(true, request, "Capability and path are allowed.");
+            return Decision(
+                true,
+                request,
+                checkPath && !string.IsNullOrWhiteSpace(request.Path)
+                    ? "Capability and path are allowed."
+                    : "Capability is allowed by the effective policy.",
+                policy.AuthorizationMode);
         }
 
         public EffectivePolicy GetEffectivePolicy()
@@ -116,7 +164,8 @@ namespace UnityIA.Core
                 return new EffectivePolicy
                 {
                     Version = EditorSession.ProtocolVersion,
-                    Source = "invalid: " + error
+                    Source = "invalid: " + error,
+                    AuthorizationMode = null
                 };
             }
 
@@ -126,6 +175,7 @@ namespace UnityIA.Core
                     ? EditorSession.ProtocolVersion
                     : policy.Version,
                 Source = source,
+                AuthorizationMode = policy.AuthorizationMode,
                 AllowedCapabilities = source == "default"
                     ? DefaultReadCapabilities.OrderBy(value => value).ToList()
                     : policy.Allow.OrderBy(value => value).ToList(),
@@ -148,6 +198,7 @@ namespace UnityIA.Core
                 policy = new PolicyFile
                 {
                     Version = EditorSession.ProtocolVersion,
+                    AuthorizationMode = AuthorizationModes.ConfirmActions,
                     Allow = DefaultReadCapabilities.ToList(),
                     Paths = new PolicyPaths
                     {
@@ -174,6 +225,12 @@ namespace UnityIA.Core
                 policy.Paths = policy.Paths ?? new PolicyPaths();
                 policy.Paths.Read = policy.Paths.Read ?? new List<string>();
                 policy.Paths.Write = policy.Paths.Write ?? new List<string>();
+                if (!TryNormalizeAuthorizationMode(policy.AuthorizationMode, out error))
+                {
+                    return false;
+                }
+
+                policy.AuthorizationMode = AuthorizationModes.ConfirmActions;
                 return true;
             }
             catch (Exception exception)
@@ -182,6 +239,51 @@ namespace UnityIA.Core
                 error = "The policy file is invalid: " + exception.Message;
                 return false;
             }
+        }
+
+        private static bool TryNormalizeAuthorizationMode(string value, out string error)
+        {
+            error = null;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                error = "The policy file must set authorizationMode to confirm_actions.";
+                return false;
+            }
+
+            if (string.Equals(value, AuthorizationModes.FullAccess, StringComparison.Ordinal))
+            {
+                error = "authorizationMode full_access is reserved and is not implemented.";
+                return false;
+            }
+
+            if (!string.Equals(value, AuthorizationModes.ConfirmActions, StringComparison.Ordinal))
+            {
+                error = "authorizationMode must be confirm_actions.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryNormalizePathAccess(
+            string value,
+            out string pathAccess,
+            out string error)
+        {
+            error = null;
+            pathAccess = string.IsNullOrWhiteSpace(value)
+                ? CommandPathAccess.None
+                : value;
+
+            if (pathAccess == CommandPathAccess.None ||
+                pathAccess == CommandPathAccess.Read ||
+                pathAccess == CommandPathAccess.Write)
+            {
+                return true;
+            }
+
+            error = "pathAccess must be none, read, or write.";
+            return false;
         }
 
         private bool TryNormalizeAssetsPath(
@@ -255,28 +357,21 @@ namespace UnityIA.Core
             return false;
         }
 
-        private static bool IsWriteCapability(string capability)
-        {
-            // TODO: Replace suffix inference with explicit path access metadata on command descriptors.
-            return capability.EndsWith(".modify", StringComparison.Ordinal) ||
-                   capability.EndsWith(".create", StringComparison.Ordinal) ||
-                   capability.EndsWith(".add", StringComparison.Ordinal) ||
-                   capability.EndsWith(".write", StringComparison.Ordinal) ||
-                   capability.EndsWith(".delete", StringComparison.Ordinal) ||
-                   capability.Equals("scene.save", StringComparison.Ordinal) ||
-                   capability.Equals("prefab.modify", StringComparison.Ordinal);
-        }
-
         private static PermissionDecision Decision(
             bool allowed,
             PermissionRequest request,
-            string reason)
+            string reason,
+            string authorizationMode = null,
+            bool requiresConfirmation = false)
         {
             return new PermissionDecision
             {
                 Allowed = allowed,
                 Capability = request == null ? null : request.Capability,
                 Path = request == null ? null : request.Path,
+                PathAccess = request == null ? null : request.PathAccess,
+                AuthorizationMode = authorizationMode,
+                RequiresConfirmation = requiresConfirmation,
                 Reason = reason
             };
         }

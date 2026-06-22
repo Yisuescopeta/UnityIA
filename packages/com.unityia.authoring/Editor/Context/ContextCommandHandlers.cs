@@ -10,6 +10,7 @@ namespace UnityIA.Context
     {
         static ContextBootstrap()
         {
+            CoreServices.Registry.Register(new ContextSnapshotHandler());
             CoreServices.Registry.Register(new ContextGetHandler());
             CoreServices.Registry.Register(new SceneListOpenHandler());
             CoreServices.Registry.Register(new SceneHierarchyHandler());
@@ -17,9 +18,40 @@ namespace UnityIA.Context
         }
     }
 
+    internal sealed class ContextSnapshotHandler : CommandHandler<ContextQuery>
+    {
+        public ContextSnapshotHandler()
+            : base(
+                "context.snapshot",
+                false,
+                "context.read",
+                CommandSurfaces.Public,
+                CommandPathAccess.Read,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
+        {
+        }
+
+        protected override ActionResult<JObject> Execute(
+            ContextQuery arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return global::UnityIA.UnityIAContextAPI.GetSnapshot(arguments);
+        }
+    }
+
     internal sealed class ContextGetHandler : CommandHandler<ContextQuery>
     {
-        public ContextGetHandler() : base("context.get", false, "context.read")
+        public ContextGetHandler()
+            : base(
+                "context.get",
+                false,
+                "context.read",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Read,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
         {
         }
 
@@ -34,7 +66,15 @@ namespace UnityIA.Context
 
     internal sealed class SceneListOpenHandler : CommandHandler<EmptyArguments>
     {
-        public SceneListOpenHandler() : base("scene.list-open", false, "context.read")
+        public SceneListOpenHandler()
+            : base(
+                "scene.list-open",
+                false,
+                "context.read",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Read,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
         {
         }
 
@@ -51,7 +91,15 @@ namespace UnityIA.Context
 
     internal sealed class SceneHierarchyHandler : CommandHandler<HierarchyQuery>
     {
-        public SceneHierarchyHandler() : base("scene.hierarchy.get", false, "context.read")
+        public SceneHierarchyHandler()
+            : base(
+                "scene.hierarchy.get",
+                false,
+                "context.read",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Read,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
         {
         }
 
@@ -66,7 +114,15 @@ namespace UnityIA.Context
 
     internal sealed class SceneObjectGetHandler : CommandHandler<SceneObjectQuery>
     {
-        public SceneObjectGetHandler() : base("scene.object.get", false, "context.read")
+        public SceneObjectGetHandler()
+            : base(
+                "scene.object.get",
+                false,
+                "context.read",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Read,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
         {
         }
 

@@ -1,0 +1,24 @@
+{
+  "protocolVersion": "0.1",
+  "commandId": "b1ef1cd2-4961-4d8c-a35f-d52569a9b75c",
+  "command": "authoring.set_component_field",
+  "issuedAtUtc": "2026-06-14T12:00:00Z",
+  "preconditions": {
+    "sessionId": "example-session",
+    "editorMode": "edit",
+    "activeScenePath": "Assets/Scenes/Main.unity",
+    "contextVersion": 1
+  },
+  "arguments": {
+    "target": {
+      "scenePath": "Assets/Scenes/Main.unity",
+      "hierarchyPath": "/CreatedByUnityIA"
+    },
+    "componentType": "BoxCollider",
+    "field": "isTrigger",
+    "value": true
+  },
+  "options": {
+    "dryRun": false
+  }
+}

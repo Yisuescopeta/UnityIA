@@ -8,24 +8,49 @@ namespace UnityIA.Core
 {
     public sealed class CommandDescriptor
     {
-        public CommandDescriptor(string name, bool isMutation, string capability)
+        public CommandDescriptor(
+            string name,
+            bool isMutation,
+            string capability,
+            string surface,
+            string pathAccess,
+            string[] modes,
+            bool requiresConfirmation,
+            string status = CommandStatuses.Implemented)
         {
             Name = name;
             IsMutation = isMutation;
             Capability = capability ?? string.Empty;
+            Surface = surface ?? CommandSurfaces.Technical;
+            PathAccess = pathAccess ?? CommandPathAccess.None;
+            Modes = modes == null || modes.Length == 0
+                ? new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch }
+                : modes.ToArray();
+            RequiresConfirmation = requiresConfirmation;
+            Status = status ?? CommandStatuses.Implemented;
         }
 
         public string Name { get; }
         public bool IsMutation { get; }
         public string Capability { get; }
+        public string Surface { get; }
+        public string PathAccess { get; }
+        public string[] Modes { get; }
+        public bool RequiresConfirmation { get; }
+        public string Status { get; }
 
         public CommandDescriptorDto ToDto()
         {
             return new CommandDescriptorDto
             {
                 Name = Name,
+                Surface = Surface,
+                Status = Status,
                 IsMutation = IsMutation,
                 Capability = Capability,
+                PathAccess = PathAccess,
+                Modes = Modes.ToArray(),
+                RequiresConfirmation = RequiresConfirmation,
                 Version = EditorSession.ProtocolVersion
             };
         }
@@ -53,9 +78,23 @@ namespace UnityIA.Core
 
     public abstract class CommandHandler<TArguments> : ICommandHandler
     {
-        protected CommandHandler(string name, bool isMutation, string capability)
+        protected CommandHandler(
+            string name,
+            bool isMutation,
+            string capability,
+            string surface,
+            string pathAccess,
+            string[] modes,
+            bool requiresConfirmation)
         {
-            Descriptor = new CommandDescriptor(name, isMutation, capability);
+            Descriptor = new CommandDescriptor(
+                name,
+                isMutation,
+                capability,
+                surface,
+                pathAccess,
+                modes,
+                requiresConfirmation);
         }
 
         public CommandDescriptor Descriptor { get; }
@@ -139,6 +178,13 @@ namespace UnityIA.Core
                 .OrderBy(descriptor => descriptor.Name, StringComparer.Ordinal)
                 .ToArray();
         }
+
+        public IReadOnlyList<CommandDescriptor> ListDescriptors()
+        {
+            return handlers.Values
+                .Select(handler => handler.Descriptor)
+                .OrderBy(descriptor => descriptor.Name, StringComparer.Ordinal)
+                .ToArray();
+        }
     }
 }
-

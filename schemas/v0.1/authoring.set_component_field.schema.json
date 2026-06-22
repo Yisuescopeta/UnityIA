@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    { "$ref": "../common/mutation-command.schema.json" },
+    {
+      "properties": {
+        "command": { "const": "authoring.set_component_field" },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target", "componentType", "field", "value"],
+          "properties": {
+            "target": { "$ref": "../common/object-reference.schema.json" },
+            "componentType": { "enum": ["Transform", "BoxCollider"] },
+            "field": {
+              "enum": [
+                "localPosition",
+                "localEulerAngles",
+                "localScale",
+                "center",
+                "size",
+                "isTrigger"
+              ]
+            },
+            "value": {}
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "componentType": { "const": "Transform" },
+                "field": {
+                  "enum": ["localPosition", "localEulerAngles", "localScale"]
+                },
+                "value": { "$ref": "../common/vector3.schema.json" }
+              }
+            },
+            {
+              "properties": {
+                "componentType": { "const": "BoxCollider" },
+                "field": { "enum": ["center", "size"] },
+                "value": { "$ref": "../common/vector3.schema.json" }
+              }
+            },
+            {
+              "properties": {
+                "componentType": { "const": "BoxCollider" },
+                "field": { "const": "isTrigger" },
+                "value": { "type": "boolean" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

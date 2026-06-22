@@ -10,10 +10,13 @@ namespace UnityIA.Core
             Registry = new CommandRegistry();
             Permissions = new PermissionService();
             Audit = new AuditService();
-            Dispatcher = new CommandDispatcher(Registry, Permissions, Audit);
+            Confirmations = new ConfirmationService();
+            Dispatcher = new CommandDispatcher(Registry, Permissions, Audit, Confirmations);
 
             Registry.Register(new SystemStatusHandler());
             Registry.Register(new CommandsListHandler());
+            Registry.Register(new CapabilitiesListHandler());
+            Registry.Register(new ValidateActiveSceneHandler());
             Registry.Register(new ValidateCommandHandler());
             Registry.Register(new ExplainPermissionHandler());
         }
@@ -21,7 +24,7 @@ namespace UnityIA.Core
         public static CommandRegistry Registry { get; }
         public static PermissionService Permissions { get; }
         public static AuditService Audit { get; }
+        public static ConfirmationService Confirmations { get; }
         public static CommandDispatcher Dispatcher { get; }
     }
 }
-

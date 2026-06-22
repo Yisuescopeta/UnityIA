@@ -314,3 +314,100 @@ namespace UnityIA.Transport
     }
 }
 
+namespace UnityIA
+{
+    public static class UnityIABatchEntrypoint
+    {
+        public static void ExecuteCommand()
+        {
+            ActionResult<JObject> result = ExecuteCommandForArgs(
+                Environment.GetCommandLineArgs());
+            WriteResultFromArgs(Environment.GetCommandLineArgs(), result);
+            EditorApplication.Exit(result.Success ? 0 : 1);
+        }
+
+        public static ActionResult<JObject> ExecuteCommandForArgs(string[] args)
+        {
+            EditorSession.ExecutionMode = CommandExecutionModes.Batch;
+            string commandFile = GetOption(args, "-unityiaCommandFile");
+            if (string.IsNullOrWhiteSpace(commandFile))
+            {
+                return Results.Error(
+                    ResultCodes.InvalidCommand,
+                    "-unityiaCommandFile is required.");
+            }
+
+            if (!File.Exists(commandFile))
+            {
+                return Results.Error(
+                    ResultCodes.TargetNotFound,
+                    "The batch command file was not found.",
+                    new JObject
+                    {
+                        ["commandFile"] = commandFile
+                    });
+            }
+
+            try
+            {
+                return CoreServices.Dispatcher.ExecuteJson(File.ReadAllText(commandFile));
+            }
+            catch (Exception exception)
+            {
+                return Results.Error(
+                    ResultCodes.UnityOperationFailed,
+                    "Batch command execution failed: " + exception.Message);
+            }
+        }
+
+        private static void WriteResultFromArgs(
+            string[] args,
+            ActionResult<JObject> result)
+        {
+            string resultFile = GetOption(args, "-unityiaResultFile");
+            string json = CommandJson.Serialize(result, Formatting.None);
+            if (string.IsNullOrWhiteSpace(resultFile))
+            {
+                Console.WriteLine(json);
+                return;
+            }
+
+            try
+            {
+                string directory = Path.GetDirectoryName(resultFile);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                File.WriteAllText(resultFile, json);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(CommandJson.Serialize(
+                    Results.Error(
+                        ResultCodes.UnityOperationFailed,
+                        "Could not write batch result: " + exception.Message),
+                    Formatting.None));
+            }
+        }
+
+        private static string GetOption(string[] args, string name)
+        {
+            if (args == null)
+            {
+                return null;
+            }
+
+            for (int index = 0; index < args.Length - 1; index++)
+            {
+                if (string.Equals(args[index], name, StringComparison.Ordinal))
+                {
+                    return args[index + 1];
+                }
+            }
+
+            return null;
+        }
+    }
+}

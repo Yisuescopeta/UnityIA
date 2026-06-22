@@ -1,5 +1,9 @@
 # Permisos y modos de autorizacion
 
+El orden de implementacion se decide en [project-plan.md](project-plan.md).
+El catalogo de comandos que consume estas capacidades se documenta en
+[commands.md](commands.md), y el roadmap de fases en [roadmap.md](roadmap.md).
+
 ## Objetivo
 
 El sistema de permisos limita que puede solicitar un agente incluso cuando el
@@ -25,17 +29,28 @@ UnityIA puede leerla, pero los comandos publicos no deben modificarla. Los
 cambios de politica son una accion administrativa fuera del protocolo de
 authoring.
 
-La politica debe expresar como minimo:
+La politica estable de v0.6 expresa como minimo:
 
 - version;
-- modo de autorizacion;
+- modo de autorizacion mediante `authorizationMode`;
 - capacidades permitidas;
 - rutas de lectura;
 - rutas de escritura;
 - restricciones especificas cuando existan.
 
-El schema y la forma definitiva evolucionaran con v0.6. Cualquier archivo de
-ejemplo anterior a esa version es provisional.
+Forma base:
+
+```json
+{
+  "version": "0.1",
+  "authorizationMode": "confirm_actions",
+  "allow": ["context.read", "capabilities.read"],
+  "paths": {
+    "read": ["Assets/**"],
+    "write": []
+  }
+}
+```
 
 ## Modos de autorizacion
 
@@ -49,6 +64,8 @@ Modo previsto para adopcion inicial:
 - denegar o expirar la confirmacion cancela la operacion.
 
 Confirmar una accion no concede nuevas capacidades ni amplia rutas.
+La aprobacion queda ligada al `commandId` y al hash canonico del payload; si el
+payload cambia, la mutacion se deniega.
 
 ### `full_access`
 
@@ -66,8 +83,9 @@ preautorizadas. Mantiene validacion, auditoria, Undo y limites de transporte.
 - acceso a internals;
 - desactivar auditoria o validacion.
 
-No debe implementarse hasta disponer de threat model, revocacion inmediata,
-pruebas negativas y una indicacion visible de que esta activo.
+La policy `full_access` se rechaza en v0.6. No debe implementarse hasta
+disponer de threat model, revocacion inmediata, pruebas negativas y una
+indicacion visible de que esta activo.
 
 ## Modos de ejecucion y permisos
 
@@ -83,14 +101,14 @@ Ejemplos:
 
 ## Capacidades iniciales objetivo
 
-Los nombres definitivos se estabilizaran en v0.6. El catalogo inicial previsto
-incluye:
+El catalogo inicial v0.6 incluye:
 
 - `context.read`
 - `capabilities.read`
 - `scene.gameobject.create`
 - `scene.component.add`
 - `scene.component.write`
+- `scene.save`
 - `validation.scene.run`
 - `tests.run`
 
@@ -107,8 +125,10 @@ La policy por defecto del prototipo permite solo lecturas seguras documentadas:
 La policy por defecto no concede mutaciones.
 
 El package base conserva aliases internos de prototipo para algunos handlers no
-estables, por ejemplo `scene.modify` y `scene.save`. Esos nombres no forman
-parte del catalogo publico objetivo y no deben tratarse como API estable.
+estables, por ejemplo `scene.modify` y el comando tecnico `scene.save`.
+`scene.modify` no forma parte del catalogo publico objetivo y no debe tratarse
+como API estable. La capacidad `scene.save` si se usa para el comando publico
+`authoring.save_scene`.
 
 ## Rutas seguras
 
@@ -149,6 +169,8 @@ warning explicito.
 
 ## Estado actual
 
-El modelo descrito es el contrato de gobernanza. El prototipo existente no debe
-considerarse implementacion completa de `confirm_actions`, `full_access` ni del
-catalogo de capacidades objetivo.
+Los comandos declaran metadatos explicitos de acceso de ruta (`none`, `read` o
+`write`). La policy no infiere escritura por sufijos de capability.
+
+El modelo descrito es el contrato de gobernanza. `confirm_actions` esta
+implementado para mutaciones; `full_access` sigue reservado y denegado.

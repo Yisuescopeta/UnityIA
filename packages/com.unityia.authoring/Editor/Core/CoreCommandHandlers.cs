@@ -9,7 +9,15 @@ namespace UnityIA.Core
 {
     internal sealed class SystemStatusHandler : CommandHandler<EmptyArguments>
     {
-        public SystemStatusHandler() : base("system.status", false, string.Empty)
+        public SystemStatusHandler()
+            : base(
+                "system.status",
+                false,
+                string.Empty,
+                CommandSurfaces.Technical,
+                CommandPathAccess.None,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
         {
         }
 
@@ -38,7 +46,15 @@ namespace UnityIA.Core
 
     internal sealed class CommandsListHandler : CommandHandler<EmptyArguments>
     {
-        public CommandsListHandler() : base("system.commands.list", false, "capabilities.read")
+        public CommandsListHandler()
+            : base(
+                "system.commands.list",
+                false,
+                "capabilities.read",
+                CommandSurfaces.Technical,
+                CommandPathAccess.None,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
         {
         }
 
@@ -56,10 +72,163 @@ namespace UnityIA.Core
         }
     }
 
+    internal sealed class CapabilitiesListHandler : CommandHandler<EmptyArguments>
+    {
+        public CapabilitiesListHandler()
+            : base(
+                "capabilities.list",
+                false,
+                "capabilities.read",
+                CommandSurfaces.Public,
+                CommandPathAccess.None,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
+        {
+        }
+
+        protected override ActionResult<JObject> Execute(
+            EmptyArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            EffectivePolicy policy = CoreServices.Permissions.GetEffectivePolicy();
+            JArray commands = new JArray();
+            foreach (CommandDescriptor descriptor in CoreServices.Registry.ListDescriptors())
+            {
+                PermissionDecision permission = PermissionFor(descriptor, policy);
+                bool requiresConfirmation = descriptor.IsMutation &&
+                    descriptor.RequiresConfirmation &&
+                    string.Equals(
+                        policy.AuthorizationMode,
+                        AuthorizationModes.ConfirmActions,
+                        StringComparison.Ordinal);
+                permission.RequiresConfirmation = permission.Allowed && requiresConfirmation;
+
+                commands.Add(
+                    new JObject
+                    {
+                        ["name"] = descriptor.Name,
+                        ["surface"] = descriptor.Surface,
+                        ["status"] = descriptor.Status,
+                        ["version"] = EditorSession.ProtocolVersion,
+                        ["isMutation"] = descriptor.IsMutation,
+                        ["capability"] = descriptor.Capability,
+                        ["pathAccess"] = descriptor.PathAccess,
+                        ["modes"] = JArray.FromObject(descriptor.Modes),
+                        ["requiresConfirmation"] = requiresConfirmation,
+                        ["permission"] = JObject.FromObject(permission),
+                        ["restrictions"] = Restrictions(descriptor, requiresConfirmation)
+                    });
+            }
+
+            return Results.Ok(
+                "Registered capabilities.",
+                new JObject
+                {
+                    ["protocolVersion"] = EditorSession.ProtocolVersion,
+                    ["sessionId"] = EditorSession.SessionId,
+                    ["executionMode"] = EditorSession.ExecutionMode,
+                    ["authorizationMode"] = policy.AuthorizationMode,
+                    ["policySource"] = policy.Source,
+                    ["commands"] = commands
+                });
+        }
+
+        private static PermissionDecision PermissionFor(
+            CommandDescriptor descriptor,
+            EffectivePolicy policy)
+        {
+            if (string.IsNullOrWhiteSpace(descriptor.Capability))
+            {
+                return new PermissionDecision
+                {
+                    Allowed = true,
+                    Capability = descriptor.Capability,
+                    PathAccess = descriptor.PathAccess,
+                    AuthorizationMode = policy.AuthorizationMode,
+                    Reason = "Command does not require a project capability."
+                };
+            }
+
+            return CoreServices.Permissions.EvaluateCapability(
+                new PermissionRequest
+                {
+                    Capability = descriptor.Capability,
+                    PathAccess = descriptor.PathAccess
+                });
+        }
+
+        private static JArray Restrictions(
+            CommandDescriptor descriptor,
+            bool requiresConfirmation)
+        {
+            JArray restrictions = new JArray();
+            if (descriptor.Surface == CommandSurfaces.Technical)
+            {
+                restrictions.Add("Technical command; not part of the public authoring catalog.");
+            }
+
+            if (descriptor.PathAccess == CommandPathAccess.Read)
+            {
+                restrictions.Add("Requires an authorized read path when a content path is used.");
+            }
+            else if (descriptor.PathAccess == CommandPathAccess.Write)
+            {
+                restrictions.Add("Requires an authorized write path when a content path is used.");
+            }
+
+            if (requiresConfirmation)
+            {
+                restrictions.Add("Mutations require explicit confirm_actions approval.");
+            }
+
+            return restrictions;
+        }
+    }
+
+    internal sealed class ValidateActiveSceneHandler :
+        CommandHandler<ValidateActiveSceneArguments>
+    {
+        public ValidateActiveSceneHandler()
+            : base(
+                "validate.active_scene",
+                false,
+                "validation.scene.run",
+                CommandSurfaces.Public,
+                CommandPathAccess.Read,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
+        {
+        }
+
+        protected override ActionResult<JObject> Validate(
+            ValidateActiveSceneArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return ActiveSceneValidationService.ValidateArguments(arguments);
+        }
+
+        protected override ActionResult<JObject> Execute(
+            ValidateActiveSceneArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return ActiveSceneValidationService.Validate(arguments);
+        }
+    }
+
     internal sealed class ValidateCommandHandler : CommandHandler<ValidateCommandArguments>
     {
         public ValidateCommandHandler()
-            : base("validation.command.validate", false, string.Empty)
+            : base(
+                "validation.command.validate",
+                false,
+                string.Empty,
+                CommandSurfaces.Technical,
+                CommandPathAccess.None,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
         {
         }
 
@@ -106,7 +275,14 @@ namespace UnityIA.Core
     internal sealed class ExplainPermissionHandler : CommandHandler<PermissionRequest>
     {
         public ExplainPermissionHandler()
-            : base("permissions.explain", false, string.Empty)
+            : base(
+                "permissions.explain",
+                false,
+                string.Empty,
+                CommandSurfaces.Technical,
+                CommandPathAccess.None,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                false)
         {
         }
 

@@ -1,5 +1,9 @@
 # Glosario de UnityIA
 
+Este glosario acompana al [plan maestro](project-plan.md), el
+[roadmap](roadmap.md), el [catalogo de comandos](commands.md) y el documento de
+[permisos](permissions.md).
+
 ## ActionResult
 
 Resultado serializable obligatorio de una operacion publica. Contiene al menos
@@ -35,8 +39,8 @@ comando, argumentos, precondiciones y opciones.
 
 ## `confirm_actions`
 
-Modo de autorizacion previsto en el que cada mutacion permitida necesita
-confirmacion explicita antes de ejecutarse.
+Modo de autorizacion en el que cada mutacion permitida necesita confirmacion
+explicita antes de ejecutarse.
 
 ## Context version
 

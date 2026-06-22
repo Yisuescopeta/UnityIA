@@ -1,0 +1,12 @@
+{
+  "protocolVersion": "0.1",
+  "commandId": "0edcf18a-c996-43f4-88d4-3c5b64f0099e",
+  "command": "validate.active_scene",
+  "issuedAtUtc": "2026-06-14T12:00:00Z",
+  "arguments": {
+    "scenePath": "Assets/Scenes/Main.unity"
+  },
+  "options": {
+    "dryRun": false
+  }
+}

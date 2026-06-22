@@ -15,6 +15,10 @@ namespace UnityIA.Authoring
     {
         static AuthoringBootstrap()
         {
+            CoreServices.Registry.Register(new CreateGameObjectHandler());
+            CoreServices.Registry.Register(new AddComponentHandler());
+            CoreServices.Registry.Register(new SetComponentFieldHandler());
+            CoreServices.Registry.Register(new SaveScenePublicHandler());
             CoreServices.Registry.Register(new CreateEmptyHandler());
             CoreServices.Registry.Register(new RenameHandler());
             CoreServices.Registry.Register(new SetActiveHandler());
@@ -25,10 +29,143 @@ namespace UnityIA.Authoring
         }
     }
 
+    internal sealed class CreateGameObjectHandler :
+        CommandHandler<CreateGameObjectArguments>
+    {
+        public CreateGameObjectHandler()
+            : base(
+                "authoring.create_gameobject",
+                true,
+                "scene.gameobject.create",
+                CommandSurfaces.Public,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
+        {
+        }
+
+        protected override ActionResult<JObject> Validate(
+            CreateGameObjectArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return AuthoringValidation.ValidateCreateGameObject(arguments, envelope);
+        }
+
+        protected override ActionResult<JObject> Execute(
+            CreateGameObjectArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return global::UnityIA.UnityIAAuthoringAPI.CreateGameObject(arguments, envelope);
+        }
+    }
+
+    internal sealed class AddComponentHandler : CommandHandler<AddComponentArguments>
+    {
+        public AddComponentHandler()
+            : base(
+                "authoring.add_component",
+                true,
+                "scene.component.add",
+                CommandSurfaces.Public,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
+        {
+        }
+
+        protected override ActionResult<JObject> Validate(
+            AddComponentArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return AuthoringValidation.ValidateAddComponent(arguments, envelope);
+        }
+
+        protected override ActionResult<JObject> Execute(
+            AddComponentArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return global::UnityIA.UnityIAAuthoringAPI.AddComponent(arguments, envelope);
+        }
+    }
+
+    internal sealed class SetComponentFieldHandler :
+        CommandHandler<SetComponentFieldArguments>
+    {
+        public SetComponentFieldHandler()
+            : base(
+                "authoring.set_component_field",
+                true,
+                "scene.component.write",
+                CommandSurfaces.Public,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
+        {
+        }
+
+        protected override ActionResult<JObject> Validate(
+            SetComponentFieldArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return AuthoringValidation.ValidateSetComponentField(arguments, envelope);
+        }
+
+        protected override ActionResult<JObject> Execute(
+            SetComponentFieldArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return global::UnityIA.UnityIAAuthoringAPI.SetComponentField(arguments, envelope);
+        }
+    }
+
+    internal sealed class SaveScenePublicHandler : CommandHandler<SaveSceneArguments>
+    {
+        public SaveScenePublicHandler()
+            : base(
+                "authoring.save_scene",
+                true,
+                "scene.save",
+                CommandSurfaces.Public,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
+        {
+        }
+
+        protected override ActionResult<JObject> Validate(
+            SaveSceneArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return AuthoringValidation.ValidateSaveScene(arguments);
+        }
+
+        protected override ActionResult<JObject> Execute(
+            SaveSceneArguments arguments,
+            CommandEnvelope envelope,
+            CommandExecutionContext context)
+        {
+            return global::UnityIA.UnityIAAuthoringAPI.SaveScene(arguments);
+        }
+    }
+
     internal sealed class CreateEmptyHandler : CommandHandler<CreateEmptyArguments>
     {
         public CreateEmptyHandler()
-            : base("scene.object.create-empty", true, "scene.modify")
+            : base(
+                "scene.object.create-empty",
+                true,
+                "scene.modify",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
         {
         }
 
@@ -136,7 +273,15 @@ namespace UnityIA.Authoring
 
     internal sealed class RenameHandler : CommandHandler<RenameArguments>
     {
-        public RenameHandler() : base("scene.object.rename", true, "scene.modify")
+        public RenameHandler()
+            : base(
+                "scene.object.rename",
+                true,
+                "scene.modify",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
         {
         }
 
@@ -179,7 +324,14 @@ namespace UnityIA.Authoring
     internal sealed class SetActiveHandler : CommandHandler<SetActiveArguments>
     {
         public SetActiveHandler()
-            : base("scene.object.set-active", true, "scene.modify")
+            : base(
+                "scene.object.set-active",
+                true,
+                "scene.modify",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
         {
         }
 
@@ -220,7 +372,14 @@ namespace UnityIA.Authoring
     internal sealed class SetTransformHandler : CommandHandler<SetTransformArguments>
     {
         public SetTransformHandler()
-            : base("scene.object.set-transform", true, "scene.modify")
+            : base(
+                "scene.object.set-transform",
+                true,
+                "scene.modify",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
         {
         }
 
@@ -301,7 +460,14 @@ namespace UnityIA.Authoring
     internal sealed class ReparentHandler : CommandHandler<ReparentArguments>
     {
         public ReparentHandler()
-            : base("scene.object.reparent", true, "scene.modify")
+            : base(
+                "scene.object.reparent",
+                true,
+                "scene.modify",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
         {
         }
 
@@ -408,7 +574,15 @@ namespace UnityIA.Authoring
 
     internal sealed class DeleteHandler : CommandHandler<DeleteArguments>
     {
-        public DeleteHandler() : base("scene.object.delete", true, "scene.modify")
+        public DeleteHandler()
+            : base(
+                "scene.object.delete",
+                true,
+                "scene.modify",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
         {
         }
 
@@ -458,7 +632,15 @@ namespace UnityIA.Authoring
 
     internal sealed class SaveSceneHandler : CommandHandler<SaveSceneArguments>
     {
-        public SaveSceneHandler() : base("scene.save", true, "scene.save")
+        public SaveSceneHandler()
+            : base(
+                "scene.save",
+                true,
+                "scene.save",
+                CommandSurfaces.Technical,
+                CommandPathAccess.Write,
+                new[] { CommandExecutionModes.Live, CommandExecutionModes.Batch },
+                true)
         {
         }
 

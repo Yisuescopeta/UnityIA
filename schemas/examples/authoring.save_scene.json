@@ -1,0 +1,18 @@
+{
+  "protocolVersion": "0.1",
+  "commandId": "943f2062-412d-4e88-8195-58a20400ec88",
+  "command": "authoring.save_scene",
+  "issuedAtUtc": "2026-06-14T12:00:00Z",
+  "preconditions": {
+    "sessionId": "example-session",
+    "editorMode": "edit",
+    "activeScenePath": "Assets/Scenes/Main.unity",
+    "contextVersion": 1
+  },
+  "arguments": {
+    "scenePath": "Assets/Scenes/Main.unity"
+  },
+  "options": {
+    "dryRun": false
+  }
+}

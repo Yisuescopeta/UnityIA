@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    { "$ref": "../common/command-base.schema.json" },
+    {
+      "properties": {
+        "command": { "const": "validate.active_scene" },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scenePath"],
+          "properties": {
+            "scenePath": { "type": "string", "pattern": "^Assets/.+\\.unity$" }
+          }
+        }
+      }
+    }
+  ]
+}

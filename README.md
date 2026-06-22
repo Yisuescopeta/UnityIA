@@ -42,31 +42,40 @@ arbitrario ni generar scripts C# como mecanismo de escape.
 
 ## Estado actual y contrato objetivo
 
-Este repositorio contiene documentacion y un prototipo tecnico no consolidado.
-La documentacion de nivel superior en `docs/*.md` define el contrato objetivo y
-la gobernanza que deben guiar el desarrollo.
+Este repositorio contiene documentacion, un package Unity Editor-only y un CLI
+.NET en evolucion. El plan maestro en `docs/project-plan.md` separa el estado
+implementado del contrato futuro y debe usarse como fuente operativa antes de
+ampliar capacidades.
 
 En el roadmap actual:
 
 - `v0.1` = foundation documental, protocolo base y contratos minimos.
 - `v0.2` = package base de Unity y piezas tecnicas de soporte.
 - `v0.3` = primera Authoring API controlada.
+- `v0.6` = capabilities, validacion de escena activa y confirmacion.
 
-El paquete actual en `packages/com.unityia.authoring` pertenece a esa base
-tecnica. No debe describirse como una implementacion completa del protocolo de
-authoring ni como una entrega cerrada de `v0.3`.
+El paquete actual en `packages/com.unityia.authoring` entrega el catalogo
+publico inicial de authoring y validacion documentado hasta v0.6. No debe
+describirse como una implementacion completa mas alla de esos comandos ni como
+una autorizacion para usar prototipos tecnicos como API estable.
 
 La existencia de una clase, schema o comando experimental en el repositorio no
-lo convierte en API estable. En particular, los comandos documentados para la
-primera interfaz publica estan reservados pero todavia no se consideran
-implementados:
+lo convierte en API estable. Los primeros comandos publicos de authoring v0.3
+son:
 
 - `context.snapshot`
-- `capabilities.list`
 - `authoring.create_gameobject`
 - `authoring.add_component`
 - `authoring.set_component_field`
+- `authoring.save_scene`
+
+Los comandos publicos incorporados en v0.6 son:
+
+- `capabilities.list`
 - `validate.active_scene`
+
+Las mutaciones autorizadas bajo `confirm_actions` requieren aprobacion
+explicita antes de ejecutarse.
 
 Un comando solo pasa de reservado a implementado cuando existe su DTO,
 validador, registro publico, permisos, auditoria, `ActionResult` estable y
@@ -77,11 +86,15 @@ un comando.
 
 ## Documentacion
 
+- [Plan maestro](docs/project-plan.md)
 - [Arquitectura](docs/architecture.md)
 - [CLI](docs/cli.md)
 - [Comandos](docs/commands.md)
+- [Integracion IA](docs/ai-integration.md)
 - [Permisos](docs/permissions.md)
 - [Roadmap](docs/roadmap.md)
+- [Protocolo v0.1](docs/protocol/v0.1.md)
+- [Sandbox de desarrollo](docs/development/sandbox.md)
 - [Glosario](docs/glossary.md)
 
 ## Reglas para agentes Codex

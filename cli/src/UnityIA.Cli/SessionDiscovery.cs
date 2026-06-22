@@ -46,38 +46,74 @@ internal static class SessionDiscovery
     public static LiveSessionDescriptor? Select(
         IReadOnlyList<LiveSessionDescriptor> sessions,
         string? project,
+        string? sessionId,
         out string? error)
     {
         error = null;
-        if (!string.IsNullOrWhiteSpace(project))
+        IEnumerable<LiveSessionDescriptor> candidates = sessions;
+        bool hasProject = !string.IsNullOrWhiteSpace(project);
+        bool hasSessionId = !string.IsNullOrWhiteSpace(sessionId);
+
+        if (hasSessionId)
         {
-            string expected = Path.GetFullPath(project);
-            LiveSessionDescriptor[] matches = sessions
-                .Where(session => string.Equals(
-                    Path.GetFullPath(session.ProjectPath),
-                    expected,
-                    StringComparison.OrdinalIgnoreCase))
-                .ToArray();
+            candidates = candidates.Where(session => string.Equals(
+                session.SessionId,
+                sessionId,
+                StringComparison.Ordinal));
+        }
+
+        if (hasProject)
+        {
+            if (!TryGetFullPath(project!, out string expected, out error))
+            {
+                return null;
+            }
+
+            candidates = candidates.Where(session =>
+                TryGetFullPath(session.ProjectPath, out string actual, out _) &&
+                string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase));
+        }
+
+        LiveSessionDescriptor[] matches = candidates.ToArray();
+        if (hasProject || hasSessionId)
+        {
             if (matches.Length == 1)
             {
                 return matches[0];
             }
 
             error = matches.Length == 0
-                ? "No live UnityIA session matches the requested project."
-                : "Multiple live sessions match the requested project.";
+                ? "No live UnityIA session matches the requested selector."
+                : "Multiple live UnityIA sessions match the requested selector.";
             return null;
         }
 
-        if (sessions.Count == 1)
+        if (matches.Length == 1)
         {
-            return sessions[0];
+            return matches[0];
         }
 
-        error = sessions.Count == 0
+        error = matches.Length == 0
             ? "No live UnityIA session was found."
-            : "Multiple sessions are live; specify --project.";
+            : "Multiple sessions are live; specify --project or --session.";
         return null;
+    }
+
+    private static bool TryGetFullPath(string path, out string fullPath, out string? error)
+    {
+        fullPath = string.Empty;
+        error = null;
+        try
+        {
+            fullPath = Path.GetFullPath(path);
+            return true;
+        }
+        catch (Exception exception) when (
+            exception is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            error = "Invalid project path: " + exception.Message;
+            return false;
+        }
     }
 
     private static bool IsRunning(int processId)
@@ -93,4 +129,3 @@ internal static class SessionDiscovery
         }
     }
 }
-

@@ -11,17 +11,20 @@ namespace UnityIA.Core
         private readonly CommandRegistry registry;
         private readonly PermissionService permissions;
         private readonly AuditService audit;
+        private readonly ConfirmationService confirmations;
         private readonly Dictionary<string, StoredCommandResult> idempotency =
             new Dictionary<string, StoredCommandResult>(StringComparer.Ordinal);
 
         public CommandDispatcher(
             CommandRegistry registry,
             PermissionService permissions,
-            AuditService audit)
+            AuditService audit,
+            ConfirmationService confirmations)
         {
             this.registry = registry;
             this.permissions = permissions;
             this.audit = audit;
+            this.confirmations = confirmations;
         }
 
         public ActionResult<JObject> ExecuteJson(string json)
@@ -58,7 +61,8 @@ namespace UnityIA.Core
                 new PermissionRequest
                 {
                     Capability = handler.Descriptor.Capability,
-                    Path = ExtractPermissionPath(envelope)
+                    Path = ExtractPermissionPath(envelope),
+                    PathAccess = handler.Descriptor.PathAccess
                 });
             if (!string.IsNullOrEmpty(handler.Descriptor.Capability) && !decision.Allowed)
             {
@@ -124,7 +128,8 @@ namespace UnityIA.Core
                 new PermissionRequest
                 {
                     Capability = handler.Descriptor.Capability,
-                    Path = ExtractPermissionPath(envelope)
+                    Path = ExtractPermissionPath(envelope),
+                    PathAccess = handler.Descriptor.PathAccess
                 });
             if (!string.IsNullOrEmpty(handler.Descriptor.Capability) && !decision.Allowed)
             {
@@ -134,13 +139,14 @@ namespace UnityIA.Core
                     Results.Error(
                         ResultCodes.PermissionDenied,
                         decision.Reason,
-                        JObject.FromObject(decision)));
+                        JObject.FromObject(decision)),
+                    decision);
             }
 
             ActionResult<JObject> handlerValidation = handler.Validate(envelope, context);
             if (!handlerValidation.Success)
             {
-                return Complete(envelope, handler.Descriptor, handlerValidation);
+                return Complete(envelope, handler.Descriptor, handlerValidation, decision);
             }
 
             bool mutates = handler.Descriptor.IsMutation && !envelope.Options.DryRun;
@@ -148,6 +154,7 @@ namespace UnityIA.Core
             bool requestAudited = audit.TryWriteRequest(
                 envelope,
                 handler.Descriptor,
+                DecoratePermissionDecision(decision, handler.Descriptor, mutates),
                 out auditError);
             string requestAuditError = requestAudited ? null : auditError;
             if (!requestAudited && mutates)
@@ -184,6 +191,82 @@ namespace UnityIA.Core
                 }
 
                 return Store(envelope, canonicalHash, dryRun);
+            }
+
+            if (mutates)
+            {
+                ConfirmationCheck confirmation = confirmations.Evaluate(
+                    envelope,
+                    handler.Descriptor,
+                    canonicalHash ?? CommandJson.ComputeCanonicalHash(envelope),
+                    decision,
+                    ExtractPermissionPath(envelope),
+                    decision.AuthorizationMode);
+                if (confirmation.IsRequired || confirmation.IsDenied)
+                {
+                    string auditDecision = confirmation.IsRequired ? "required" : "denied";
+                    if (!audit.TryWriteConfirmation(
+                            envelope,
+                            handler.Descriptor,
+                            auditDecision,
+                            confirmation.Reason,
+                            canonicalHash ?? CommandJson.ComputeCanonicalHash(envelope),
+                            out auditError))
+                    {
+                        return Decorate(
+                            Results.Error(
+                                ResultCodes.AuditUnavailable,
+                                "The mutation was not executed because confirmation audit is unavailable: " +
+                                auditError),
+                            envelope);
+                    }
+
+                    ActionResult<JObject> confirmationResult = confirmation.IsRequired
+                        ? Results.Error(
+                            ResultCodes.ConfirmationRequired,
+                            confirmation.Reason,
+                            confirmation.Pending == null
+                                ? new JObject()
+                                : confirmation.Pending.ToData())
+                        : Results.Error(
+                            ResultCodes.ConfirmationDenied,
+                            confirmation.Reason,
+                            new JObject
+                            {
+                                ["commandId"] = envelope.CommandId,
+                                ["command"] = envelope.Command
+                            });
+                    confirmationResult = Decorate(confirmationResult, envelope);
+                    if (!audit.TryWriteResult(
+                            envelope,
+                            handler.Descriptor,
+                            confirmationResult,
+                            out auditError))
+                    {
+                        Results.AddWarning(
+                            confirmationResult,
+                            "Audit is degraded: " + auditError);
+                    }
+
+                    return confirmationResult;
+                }
+
+                if (confirmation.IsApproved &&
+                    !audit.TryWriteConfirmation(
+                        envelope,
+                        handler.Descriptor,
+                        "approved",
+                        confirmation.Reason,
+                        canonicalHash ?? CommandJson.ComputeCanonicalHash(envelope),
+                        out auditError))
+                {
+                    return Decorate(
+                        Results.Error(
+                            ResultCodes.AuditUnavailable,
+                            "The mutation was not executed because confirmation audit is unavailable: " +
+                            auditError),
+                        envelope);
+                }
             }
 
             int undoGroup = -1;
@@ -308,11 +391,12 @@ namespace UnityIA.Core
         private ActionResult<JObject> Complete(
             CommandEnvelope envelope,
             CommandDescriptor descriptor,
-            ActionResult<JObject> result)
+            ActionResult<JObject> result,
+            PermissionDecision permission = null)
         {
             result = Decorate(result, envelope);
             string auditError;
-            if (!audit.TryWriteRequest(envelope, descriptor, out auditError) ||
+            if (!audit.TryWriteRequest(envelope, descriptor, permission, out auditError) ||
                 !audit.TryWriteResult(envelope, descriptor, result, out auditError))
             {
                 Results.AddWarning(result, "Audit is degraded: " + auditError);
@@ -337,6 +421,24 @@ namespace UnityIA.Core
             }
 
             return result;
+        }
+
+        private static PermissionDecision DecoratePermissionDecision(
+            PermissionDecision decision,
+            CommandDescriptor descriptor,
+            bool mutates)
+        {
+            if (decision == null || descriptor == null)
+            {
+                return decision;
+            }
+
+            decision.RequiresConfirmation = mutates && descriptor.RequiresConfirmation &&
+                string.Equals(
+                    decision.AuthorizationMode,
+                    AuthorizationModes.ConfirmActions,
+                    StringComparison.Ordinal);
+            return decision;
         }
 
         private static ActionResult<JObject> Decorate(

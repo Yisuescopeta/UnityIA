@@ -1,20 +1,10 @@
-# Roadmap
+# Roadmap versions - historical note
 
-## v0.1
+This file used to describe an earlier sequencing of UnityIA versions. It is
+kept only as historical context.
 
-Controlled live authoring of loaded scene GameObjects, strict DTO validation,
-Undo, explicit save, permissions, JSONL audit, command console, loopback HTTP,
-and .NET CLI.
+The active roadmap is `docs/roadmap.md`, and the operational development order
+is `docs/project-plan.md`.
 
-## v0.2
-
-Explicit batch transport, scene open/create, selected component adapters,
-prefab instantiation, and evaluation of a full JSON Schema validator inside
-Unity if its dependency and maintenance cost are justified.
-
-## v0.3+
-
-Controlled prefab and asset creation, Play Mode control, registered test
-execution, and broader project validation. None of these capabilities may use
-generic reflection or direct Unity YAML editing.
-
+Do not use this file to decide implementation order or to declare a capability
+stable.

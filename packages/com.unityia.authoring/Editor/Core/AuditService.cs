@@ -15,11 +15,23 @@ namespace UnityIA.Core
         public bool TryWriteRequest(
             CommandEnvelope envelope,
             CommandDescriptor descriptor,
+            PermissionDecision permission,
             out string error)
         {
             JObject entry = BaseEntry("request", envelope);
             entry["isMutation"] = descriptor.IsMutation;
+            entry["capability"] = descriptor.Capability;
+            entry["pathAccess"] = descriptor.PathAccess;
             entry["argumentsSha256"] = HashArguments(envelope.Arguments);
+            if (permission != null)
+            {
+                entry["permissionAllowed"] = permission.Allowed;
+                entry["permissionReason"] = permission.Reason;
+                entry["permissionPath"] = permission.Path;
+                entry["authorizationMode"] = permission.AuthorizationMode;
+                entry["requiresConfirmation"] = permission.RequiresConfirmation;
+            }
+
             return TryAppend(entry, descriptor.IsMutation && !envelope.Options.DryRun, out error);
         }
 
@@ -33,6 +45,23 @@ namespace UnityIA.Core
             entry["isMutation"] = descriptor.IsMutation;
             entry["success"] = result.Success;
             entry["code"] = result.Code;
+            return TryAppend(entry, descriptor.IsMutation && !envelope.Options.DryRun, out error);
+        }
+
+        public bool TryWriteConfirmation(
+            CommandEnvelope envelope,
+            CommandDescriptor descriptor,
+            string decision,
+            string reason,
+            string canonicalHash,
+            out string error)
+        {
+            JObject entry = BaseEntry("confirmation", envelope);
+            entry["isMutation"] = descriptor.IsMutation;
+            entry["capability"] = descriptor.Capability;
+            entry["decision"] = decision;
+            entry["reason"] = reason;
+            entry["canonicalHash"] = canonicalHash;
             return TryAppend(entry, descriptor.IsMutation && !envelope.Options.DryRun, out error);
         }
 
@@ -101,4 +130,3 @@ namespace UnityIA.Core
         }
     }
 }
-

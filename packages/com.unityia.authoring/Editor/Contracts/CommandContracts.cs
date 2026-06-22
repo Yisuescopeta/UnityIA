@@ -7,6 +7,37 @@ using Newtonsoft.Json.Linq;
 
 namespace UnityIA.Contracts
 {
+    public static class CommandSurfaces
+    {
+        public const string Public = "public";
+        public const string Technical = "technical";
+    }
+
+    public static class CommandStatuses
+    {
+        public const string Implemented = "implemented";
+        public const string Reserved = "reserved";
+    }
+
+    public static class CommandPathAccess
+    {
+        public const string None = "none";
+        public const string Read = "read";
+        public const string Write = "write";
+    }
+
+    public static class CommandExecutionModes
+    {
+        public const string Live = "live";
+        public const string Batch = "batch";
+    }
+
+    public static class AuthorizationModes
+    {
+        public const string ConfirmActions = "confirm_actions";
+        public const string FullAccess = "full_access";
+    }
+
     public sealed class CommandEnvelope
     {
         [JsonProperty("protocolVersion", Required = Required.Always)]
@@ -57,11 +88,26 @@ namespace UnityIA.Contracts
         [JsonProperty("name")]
         public string Name { get; set; }
 
+        [JsonProperty("surface")]
+        public string Surface { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
         [JsonProperty("isMutation")]
         public bool IsMutation { get; set; }
 
         [JsonProperty("capability")]
         public string Capability { get; set; }
+
+        [JsonProperty("pathAccess")]
+        public string PathAccess { get; set; }
+
+        [JsonProperty("modes")]
+        public string[] Modes { get; set; }
+
+        [JsonProperty("requiresConfirmation")]
+        public bool RequiresConfirmation { get; set; }
 
         [JsonProperty("version")]
         public string Version { get; set; }

@@ -4,7 +4,16 @@ using UnityIA.Protocol;
 
 namespace UnityIA.Cli;
 
-internal sealed class LiveClient : IDisposable
+internal interface ILiveClient : IDisposable
+{
+    Task<HttpResponseMessage> GetStatusAsync();
+
+    Task<HttpResponseMessage> GetCommandsAsync();
+
+    Task<HttpResponseMessage> ExecuteAsync(string json);
+}
+
+internal sealed class LiveClient : ILiveClient
 {
     private readonly HttpClient client;
 
@@ -41,4 +50,3 @@ internal sealed class LiveClient : IDisposable
         client.Dispose();
     }
 }
-

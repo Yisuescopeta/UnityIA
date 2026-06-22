@@ -1,0 +1,12 @@
+{
+  "protocolVersion": "0.1",
+  "commandId": "7eabfda0-cdb4-497f-82a8-f105b35aeef5",
+  "command": "context.snapshot",
+  "issuedAtUtc": "2026-06-14T12:00:00Z",
+  "arguments": {
+    "includeHierarchy": true
+  },
+  "options": {
+    "dryRun": false
+  }
+}

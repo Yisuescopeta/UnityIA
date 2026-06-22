@@ -79,6 +79,52 @@ namespace UnityIA.DeveloperUI
             outputScroll = EditorGUILayout.BeginScrollView(outputScroll, GUILayout.MinHeight(180));
             EditorGUILayout.TextArea(outputJson, GUILayout.ExpandHeight(true));
             EditorGUILayout.EndScrollView();
+
+            DrawPendingConfirmations();
+        }
+
+        private void DrawPendingConfirmations()
+        {
+            PendingConfirmation[] pending =
+                CoreServices.Confirmations.ListPending() as PendingConfirmation[];
+            if (pending == null || pending.Length == 0)
+            {
+                return;
+            }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Pending confirmations", EditorStyles.boldLabel);
+            foreach (PendingConfirmation request in pending)
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.LabelField("Command", request.Command);
+                EditorGUILayout.LabelField("Capability", request.Capability);
+                EditorGUILayout.LabelField("Target", request.TargetPath);
+                EditorGUILayout.LabelField("Expected effect", request.Effect);
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Approve"))
+                {
+                    outputJson = CommandJson.Serialize(
+                        CoreServices.Confirmations.ApprovePending(
+                            request.CommandId,
+                            true,
+                            "Approved from UnityIA Command Console."),
+                        Formatting.Indented);
+                }
+
+                if (GUILayout.Button("Deny"))
+                {
+                    outputJson = CommandJson.Serialize(
+                        CoreServices.Confirmations.ApprovePending(
+                            request.CommandId,
+                            false,
+                            "Denied from UnityIA Command Console."),
+                        Formatting.Indented);
+                }
+
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+            }
         }
 
         private static string CreateStatusCommand()
@@ -108,4 +154,3 @@ namespace UnityIA.DeveloperUI
         }
     }
 }
-

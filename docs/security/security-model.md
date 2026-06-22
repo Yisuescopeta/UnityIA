@@ -2,6 +2,8 @@
 
 UnityIA is deny-by-default for mutations. If `.unityia/policy.json` is absent,
 read-only operations remain available and all mutations are denied.
+The v0.6 policy schema supports `authorizationMode: "confirm_actions"` only;
+`full_access` is rejected as reserved.
 
 The v0.1 live server:
 
@@ -18,4 +20,3 @@ paths, parent traversal, and paths escaping through links are rejected.
 
 Audit logs redact command payloads by recording a SHA-256 arguments hash
 instead. Tokens and secrets are never logged.
-

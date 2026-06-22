@@ -4,6 +4,10 @@ El roadmap expresa orden y criterios de salida, no promesas de disponibilidad.
 Una version solo esta completada cuando sus contratos, implementacion,
 documentacion y pruebas de aceptacion estan alineados.
 
+El plan operativo diario esta en [project-plan.md](project-plan.md). Los
+comandos publicos y reservados estan en [commands.md](commands.md), y las reglas
+de permisos en [permissions.md](permissions.md).
+
 ## v0.1 Foundation
 
 - principios de arquitectura y seguridad;
@@ -40,6 +44,7 @@ adelanta `v0.3`.
 - `authoring.create_gameobject`;
 - catalogo cerrado para `authoring.add_component`;
 - campos registrados para `authoring.set_component_field`;
+- `authoring.save_scene`;
 - Undo, escena sucia y guardado explicito;
 - pruebas EditMode.
 
@@ -61,7 +66,6 @@ archivos Unity.
 
 - batch mode explicito;
 - Test API para suites registradas;
-- `validate.active_scene`;
 - ejecucion reproducible en CI;
 - resultados de pruebas serializables;
 - rechazo de proyectos bloqueados.
@@ -72,6 +76,7 @@ archivos Unity.
 
 - catalogo estable de capacidades;
 - `capabilities.list`;
+- `validate.active_scene`;
 - schema definitivo de `.unityia/policy.json`;
 - modo `confirm_actions`;
 - validacion ampliada de escenas y contexto;

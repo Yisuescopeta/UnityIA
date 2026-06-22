@@ -6,6 +6,8 @@
     "UnityIA.Core.Editor",
     "UnityIA.Context.Editor",
     "UnityIA.Authoring.Editor",
+    "UnityIA.Testing.Editor",
+    "UnityIA.Transport.Editor",
     "Unity.Newtonsoft.Json"
   ],
   "overrideReferences": true,

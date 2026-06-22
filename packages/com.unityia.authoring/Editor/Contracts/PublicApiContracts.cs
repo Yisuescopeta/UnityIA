@@ -19,6 +19,9 @@ namespace UnityIA.Contracts
 
         [JsonProperty("path")]
         public string Path { get; set; }
+
+        [JsonProperty("pathAccess")]
+        public string PathAccess { get; set; }
     }
 
     public sealed class PermissionDecision
@@ -32,6 +35,15 @@ namespace UnityIA.Contracts
         [JsonProperty("path")]
         public string Path { get; set; }
 
+        [JsonProperty("pathAccess")]
+        public string PathAccess { get; set; }
+
+        [JsonProperty("authorizationMode")]
+        public string AuthorizationMode { get; set; }
+
+        [JsonProperty("requiresConfirmation")]
+        public bool RequiresConfirmation { get; set; }
+
         [JsonProperty("reason")]
         public string Reason { get; set; }
     }
@@ -43,6 +55,9 @@ namespace UnityIA.Contracts
 
         [JsonProperty("source")]
         public string Source { get; set; }
+
+        [JsonProperty("authorizationMode")]
+        public string AuthorizationMode { get; set; }
 
         [JsonProperty("allowedCapabilities")]
         public List<string> AllowedCapabilities { get; set; } = new List<string>();
@@ -58,6 +73,9 @@ namespace UnityIA.Contracts
     {
         [JsonProperty("suite", Required = Required.Always)]
         public string Suite { get; set; }
+
+        [JsonProperty("mode")]
+        public string Mode { get; set; }
     }
 
     public sealed class TestRunQuery
@@ -66,4 +84,3 @@ namespace UnityIA.Contracts
         public string RunId { get; set; }
     }
 }
-

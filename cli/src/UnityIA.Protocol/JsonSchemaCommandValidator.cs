@@ -9,10 +9,17 @@ public sealed class JsonSchemaCommandValidator
     [
         "system.status",
         "system.commands.list",
+        "capabilities.list",
+        "validate.active_scene",
+        "context.snapshot",
         "context.get",
         "scene.list-open",
         "scene.hierarchy.get",
         "scene.object.get",
+        "authoring.create_gameobject",
+        "authoring.add_component",
+        "authoring.set_component_field",
+        "authoring.save_scene",
         "scene.object.create-empty",
         "scene.object.rename",
         "scene.object.set-active",
@@ -88,4 +95,3 @@ public sealed class JsonSchemaCommandValidator
             [new SchemaValidationError(path, kind)]);
     }
 }
-

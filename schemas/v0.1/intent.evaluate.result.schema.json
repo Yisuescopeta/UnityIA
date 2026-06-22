@@ -1,0 +1,311 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unityia.dev/schemas/v0.1/intent.evaluate.result.schema.json",
+  "title": "UnityIA intent evaluate ActionResult",
+  "allOf": [
+    { "$ref": "../common/action-result.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "provider",
+            "evaluation",
+            "policy",
+            "capabilities",
+            "readiness",
+            "report",
+            "traces",
+            "warnings"
+          ],
+          "properties": {
+            "provider": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "kind",
+                "label",
+                "version",
+                "realProviderEvaluated",
+                "caseSet",
+                "endpoint"
+              ],
+              "properties": {
+                "name": { "enum": ["structured", "http"] },
+                "kind": { "enum": ["deterministic", "http"] },
+                "label": {
+                  "type": ["string", "null"],
+                  "maxLength": 120
+                },
+                "version": {
+                  "type": ["string", "null"],
+                  "maxLength": 120
+                },
+                "realProviderEvaluated": { "type": "boolean" },
+                "caseSet": {
+                  "enum": [
+                    "v0.7-structured-baseline",
+                    "v0.7-user-prompt-baseline"
+                  ]
+                },
+                "endpoint": {
+                  "oneOf": [
+                    { "type": "null" },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["scheme", "host", "port", "sha256"],
+                      "properties": {
+                        "scheme": { "enum": ["http", "https"] },
+                        "host": { "type": "string", "minLength": 1 },
+                        "port": {
+                          "type": "integer",
+                          "minimum": -1,
+                          "maximum": 65535
+                        },
+                        "sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "evaluation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "generatedAtUtc", "resultSchema"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{32}$"
+                },
+                "generatedAtUtc": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "resultSchema": {
+                  "enum": ["schemas/v0.1/intent.evaluate.result.schema.json"]
+                }
+              }
+            },
+            "policy": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "minimumPassRate",
+                "requireAllSecurityCasesToPass",
+                "requireRealProvider",
+                "repeatCount",
+                "minimumRealProviderRepeatCount"
+              ],
+              "properties": {
+                "minimumPassRate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "requireAllSecurityCasesToPass": { "type": "boolean" },
+                "requireRealProvider": { "type": "boolean" },
+                "repeatCount": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 20
+                },
+                "minimumRealProviderRepeatCount": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 20
+                }
+              }
+            },
+            "capabilities": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sha256"],
+              "properties": {
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            },
+            "readiness": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "ready",
+                "code",
+                "message",
+                "providerName",
+                "providerKind",
+                "realProviderEvaluated",
+                "gate"
+              ],
+              "properties": {
+                "ready": { "type": "boolean" },
+                "code": { "type": "string", "minLength": 1 },
+                "message": { "type": "string" },
+                "providerName": { "type": "string", "minLength": 1 },
+                "providerKind": { "type": "string", "minLength": 1 },
+                "realProviderEvaluated": { "type": "boolean" },
+                "gate": { "$ref": "#/definitions/evaluationGate" }
+              }
+            },
+            "report": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "success",
+                "code",
+                "message",
+                "total",
+                "repeatCount",
+                "passed",
+                "failed",
+                "securityTotal",
+                "securityPassed",
+                "passRate",
+                "results"
+              ],
+              "properties": {
+                "success": { "type": "boolean" },
+                "code": { "type": "string", "minLength": 1 },
+                "message": { "type": "string" },
+                "total": { "type": "integer", "minimum": 0 },
+                "repeatCount": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 20
+                },
+                "passed": { "type": "integer", "minimum": 0 },
+                "failed": { "type": "integer", "minimum": 0 },
+                "securityTotal": { "type": "integer", "minimum": 0 },
+                "securityPassed": { "type": "integer", "minimum": 0 },
+                "passRate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/caseResult" }
+                }
+              }
+            },
+            "traces": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/trace" }
+            },
+            "warnings": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "evaluationGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "success",
+        "code",
+        "message",
+        "passRate",
+        "minimumPassRate",
+        "securityTotal",
+        "securityPassed"
+      ],
+      "properties": {
+        "success": { "type": "boolean" },
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string" },
+        "passRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumPassRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "securityTotal": { "type": "integer", "minimum": 0 },
+        "securityPassed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "caseResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "passed",
+        "expectedSuccess",
+        "actualSuccess",
+        "expectedCode",
+        "actualCode",
+        "expectedCommands",
+        "actualCommands",
+        "message",
+        "category",
+        "attempt"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "passed": { "type": "boolean" },
+        "expectedSuccess": { "type": "boolean" },
+        "actualSuccess": { "type": "boolean" },
+        "expectedCode": { "type": "string", "minLength": 1 },
+        "actualCode": { "type": "string", "minLength": 1 },
+        "expectedCommands": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "actualCommands": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "message": { "type": "string" },
+        "category": { "enum": ["quality", "security"] },
+        "attempt": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "promptSha256",
+        "stage",
+        "code",
+        "plannedCommands",
+        "rejectedCommands"
+      ],
+      "properties": {
+        "requestId": { "type": "string", "minLength": 1 },
+        "promptSha256": {
+          "type": "string",
+          "pattern": "^$|^[a-f0-9]{64}$"
+        },
+        "stage": { "type": "string", "minLength": 1 },
+        "code": { "type": "string", "minLength": 1 },
+        "plannedCommands": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "rejectedCommands": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
